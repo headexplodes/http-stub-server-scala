@@ -4,21 +4,33 @@ import unfiltered.netty._
 import unfiltered.request._
 import unfiltered.response._
 
-trait MyPlan extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse
+class Server {
+  
+  def getRequests =
+  def getRequest(index: Int) = Pass
+  def deleteRequest(index: Int) = Pass
+  
+  def getResponses =  ResponseString("GET responses")
+  def getResponse(index: Int) = ResponseString("GET response #" + index)
+  def deleteResponses =   ResponseString("DELETE responses")
+  def deleteResponse(index: Int) =ResponseString("DELETE response #" + id)
+  def addResponse = ResponseString("POST responses")
+  
+}
 
-object Hello extends MyPlan {
+class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse {
   
   def intent = {
 
     case req @ Path(Seg("_control" :: "responses" :: Nil)) => req match {
-      case GET(_) => ResponseString("GET responses")
-      case DELETE(_) => ResponseString("DELETE responses")
-      case POST(_) => ResponseString("POST responses")
+      case GET(_) =>
+      case DELETE(_) =>
+      case POST(_) => 
     }
 
     case req @ Path(Seg("_control" :: "responses" :: id :: Nil)) => req match {
-      case GET(_) => ResponseString("GET response #" + id)
-      case DELETE(_) => ResponseString("DELETE response #" + id)
+      case GET(_) => server.getResponse(id)
+      case DELETE(_) => server.deleteResponse(id)
     }
 
     case req @ Path(Seg("_control" :: "requests" :: Nil)) => req match {
@@ -32,11 +44,11 @@ object Hello extends MyPlan {
     }
 
   }
-  
+    
 }
 
 object Main {
   def main(args: Array[String]) {
-    unfiltered.netty.Http(8080).plan(Hello).run()
+    unfiltered.netty.Http(8080).plan(new AppPlan(new Server)).run()
   }
 }
