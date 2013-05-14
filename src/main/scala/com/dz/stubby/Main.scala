@@ -1,21 +1,42 @@
 package com.dz.stubby
 
+import unfiltered.netty._
 import unfiltered.request._
 import unfiltered.response._
 
-object Main {
+trait MyPlan extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse
 
-  def main(args: Array[String]) {
+object Hello extends MyPlan {
+  
+  def intent = {
 
-    val plan = {
-      case _ => ResponseString("hello world")
+    case req @ Path(Seg("_control" :: "responses" :: Nil)) => req match {
+      case GET(_) => ResponseString("GET responses")
+      case DELETE(_) => ResponseString("DELETE responses")
+      case POST(_) => ResponseString("POST responses")
     }
-    
-    val hello = unfiltered.netty.cycle.Planify(plan)
 
-    unfiltered.netty.Http(8080).plan(hello).run()
+    case req @ Path(Seg("_control" :: "responses" :: id :: Nil)) => req match {
+      case GET(_) => ResponseString("GET response #" + id)
+      case DELETE(_) => ResponseString("DELETE response #" + id)
+    }
+
+    case req @ Path(Seg("_control" :: "requests" :: Nil)) => req match {
+      case GET(_) => ResponseString("GET requests")
+      case DELETE(_) => ResponseString("GET requests")
+    }
+
+    case req @ Path(Seg("_control" :: "requests" :: id :: Nil)) => req match {
+      case GET(_) => ResponseString("GET request #" + id)
+      case DELETE(_) => ResponseString("DELETE request #" + id)
+    }
 
   }
-
+  
 }
 
+object Main {
+  def main(args: Array[String]) {
+    unfiltered.netty.Http(8080).plan(Hello).run()
+  }
+}
