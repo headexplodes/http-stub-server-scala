@@ -7,7 +7,12 @@ object Dependencies {
     "net.databinder" %% "unfiltered" % "0.6.8" withSources (),
     "net.databinder" %% "unfiltered-filter" % "0.6.8" withSources (),
     "net.databinder" %% "unfiltered-netty" % "0.6.8" withSources (),
-    "net.databinder" %% "unfiltered-netty-server" % "0.6.8" withSources ()
+    "net.databinder" %% "unfiltered-netty-server" % "0.6.8" withSources (),
+    
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.2.1" withSources(),
+    "com.fasterxml.jackson.core" % "jackson-core" % "2.2.1" withSources(),
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.1" withSources()
+    
     //"net.databinder" %% "unfiltered-scalate" % "0.6.8" withSources (),
     //"net.databinder" %% "unfiltered-json" % "0.6.8" withSources ()
   )

@@ -1,19 +1,22 @@
 package com.dz.stubby
 
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import unfiltered.netty._
 import unfiltered.request._
 import unfiltered.response._
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 class Server {
   
-  def getRequests =
+  def getRequests = Pass
   def getRequest(index: Int) = Pass
   def deleteRequest(index: Int) = Pass
   
   def getResponses =  ResponseString("GET responses")
   def getResponse(index: Int) = ResponseString("GET response #" + index)
   def deleteResponses =   ResponseString("DELETE responses")
-  def deleteResponse(index: Int) =ResponseString("DELETE response #" + id)
+  def deleteResponse(index: Int) =ResponseString("DELETE response #" + index)
   def addResponse = ResponseString("POST responses")
   
 }
@@ -23,14 +26,14 @@ class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with Serv
   def intent = {
 
     case req @ Path(Seg("_control" :: "responses" :: Nil)) => req match {
-      case GET(_) =>
-      case DELETE(_) =>
-      case POST(_) => 
+      case GET(_) => Pass
+      case DELETE(_) => Pass
+      case POST(_) => Pass
     }
 
     case req @ Path(Seg("_control" :: "responses" :: id :: Nil)) => req match {
-      case GET(_) => server.getResponse(id)
-      case DELETE(_) => server.deleteResponse(id)
+      case GET(_) => server.getResponse(id.toInt)
+      case DELETE(_) => server.deleteResponse(id.toInt)
     }
 
     case req @ Path(Seg("_control" :: "requests" :: Nil)) => req match {
@@ -49,6 +52,11 @@ class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with Serv
 
 object Main {
   def main(args: Array[String]) {
-    unfiltered.netty.Http(8080).plan(new AppPlan(new Server)).run()
+    
+    //unfiltered.netty.Http(8080).plan(new AppPlan(new Server)).run()
+    
+    val mapper = new ObjectMapper() with ScalaObjectMapper
+    mapper.registerModule(DefaultScalaModule)
+        
   }
 }
