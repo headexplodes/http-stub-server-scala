@@ -1,6 +1,7 @@
 package com.dz.stubby.core
 
 import scala.math.Ordered
+import scala.collection.mutable.Stack
 
 object FieldType extends Enumeration("PATH", "METHOD", "QUERY_PARAM", "HEADER", "BODY") {
   type FieldType = Value
@@ -31,10 +32,11 @@ case class MatchField(
   val partial: PartialMatchField,
   val matchType: MatchType,
   val actualValue: Any, // could be string, JSON object etc.
-  val message: String) extends PartialMatchField(
-  partial.fieldType,
-  partial.fieldName,
-  partial.expectedValue) {
+  val message: String)
+    extends PartialMatchField(
+      partial.fieldType,
+      partial.fieldName,
+      partial.expectedValue) {
 
   def score: Int = matchType match { // attempt to give some weight to matches so we can guess 'near misses'
     case NOT_FOUND => 0
@@ -51,23 +53,10 @@ case class MatchField(
 }
 
 class MatchResult(val fields: List[MatchField]) extends Ordered[MatchResult] {
-
-    def matches: Boolean = 
-      
-      
-        for (MatchField field : fields) {
-            if (field.getMatchType() != MatchField.MatchType.MATCH) {
-                return false; // found a failure
-            }
-        }
-        return true; // no failures
-    }
-
-    def score: Int = fields.foldLeft(0)(_ + _.score)
-    def compareTo(other: MatchResult) = score.compareTo(other.score) * -1; // highest score first
-
+  def matches: Boolean = fields.forall(_.matchType == MATCH)
+  def score: Int = fields.foldLeft(0)(_ + _.score)
+  def compareTo(other: MatchResult) = -score.compareTo(other.score) // highest score first
 }
-
 
 class StubServiceResult( // returned by the 'findMatch' method
     val attempts: List[MatchResult],
@@ -75,4 +64,26 @@ class StubServiceResult( // returned by the 'findMatch' method
     val delay: Int) {
   def this(attempts: List[MatchResult]) = this(attempts, null, 0)
   def matchFound(): Boolean = attempts.exists(_.matches)
+}
+
+class StubServiceExchange(val exchange: StubExchange) { // wrap exchange model with some extra runtime info
+
+  val requestPattern: RequestPattern = new RequestPattern(exchange.request)
+  val attempts: Stack[MatchResult] = new Stack
+
+  def matches(message: StubRequest): MatchResult = {
+    val result = requestPattern.findMatch(message)
+    if (result.score >= 5) { // only record attempts that match request path
+      attempts.push(result)
+    }
+    result
+  }
+
+  override def toString = requestPattern.toString
+  override def hashCode = requestPattern.hashCode(); // hash/equality is based on the request pattern only
+  override def equals(obj: Object) = obj match {
+    case e: StubServiceExchange => e.requestPattern.equals(requestPattern)
+    case _ => false
+  }
+
 }

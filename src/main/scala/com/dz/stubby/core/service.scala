@@ -4,61 +4,6 @@ import scala.collection.mutable.Stack
 
 class NotFoundException(message: String) extends RuntimeException(message)
 
-class RequestPattern(request: StubRequest) {
-  def findMatch(message: StubRequest): MatchResult = new MatchResult
-}
-
-class MatchResult {
-  def score: Int = 0
-  def matches: Boolean = false
-}
-
-class StubServiceResult( // returned by the 'findMatch' method
-    val attempts: List[MatchResult],
-    val response: StubResponse,
-    val delay: Int) {
-  def this(attempts: List[MatchResult]) = this(attempts, null, 0)
-  def matchFound(): Boolean = attempts.exists(_.matches)
-}
-
-trait BodyPattern {
-  def matches(request: StubMessage): MatchField
-}
-
-public abstract class BodyPattern { // Note: using abstract class so we can force override of equals()
-    
-    public abstract MatchField matches(StubMessage request);
-
-    @Override
-    public abstract boolean equals(Object object); // force implementors to override
-    
-    @Override
-    public abstract int hashCode(); // force implementors to override
-
-}
-
-class StubServiceExchange(val exchange: StubExchange) { // wrap exchange model with some extra runtime info
-
-  val requestPattern: RequestPattern = new RequestPattern(exchange.request)
-  val attempts: Stack[MatchResult] = new Stack
-
-  def matches(message: StubRequest): MatchResult = {
-    val result = requestPattern.findMatch(message)
-    if (result.score >= 5) { // only record attempts that match request path
-      attempts.push(result)
-    }
-    result
-  }
-
-  override def toString = requestPattern.toString
-  override def hashCode = requestPattern.hashCode(); // hash/equality is based on the request pattern only
-  override def equals(obj: Object) = obj match {
-    case e: StubServiceExchange => e.requestPattern.equals(requestPattern)
-    case _ => false
-  }
-
-}
-
 class StubService {
 
   val requests: LinkedList[StubRequest] = new LinkedList
