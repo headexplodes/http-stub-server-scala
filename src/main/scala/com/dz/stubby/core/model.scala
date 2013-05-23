@@ -4,25 +4,24 @@ case class StubParam(
   name: String,
   value: String)
 
-class StubMessage(headers: List[StubParam], body: AnyRef)
+class StubMessage(
+  val headers: List[StubParam],
+  val body: AnyRef)
 
 class StubRequest(
-  method: String,
-  path: String,
-  params: List[StubParam],
-  headers: List[StubParam],
-  body: AnyRef) extends StubMessage(headers, body)
+  val method: String,
+  val path: String,
+  val params: List[StubParam],
+  val headers: List[StubParam],
+  val body: AnyRef) extends StubMessage(headers, body)
 
 class StubResponse(
-  status: Int,
-  headers: List[StubParam],
-  body: AnyRef) extends StubMessage(headers, body)
+  val status: Int,
+  val headers: List[StubParam],
+  val body: AnyRef) extends StubMessage(headers, body)
 
 class StubExchange(
-  request: StubRequest,
-  response: StubResponse,
-  delay: Long,
-  script: String)
-
-  
-  
+  val request: StubRequest,
+  val response: StubResponse,
+  val delay: Long,
+  val script: String)
