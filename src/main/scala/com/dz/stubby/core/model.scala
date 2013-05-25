@@ -12,13 +12,13 @@ class StubRequest(
   val method: String,
   val path: String,
   val params: List[StubParam],
-  val headers: List[StubParam],
-  val body: AnyRef) extends StubMessage(headers, body)
+  override val headers: List[StubParam],
+  override val body: AnyRef) extends StubMessage(headers, body)
 
 class StubResponse(
   val status: Int,
-  val headers: List[StubParam],
-  val body: AnyRef) extends StubMessage(headers, body)
+  override val headers: List[StubParam],
+  override val body: AnyRef) extends StubMessage(headers, body)
 
 class StubExchange(
   val request: StubRequest,

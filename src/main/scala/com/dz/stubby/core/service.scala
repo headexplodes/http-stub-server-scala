@@ -6,23 +6,19 @@ class NotFoundException(message: String) extends RuntimeException(message)
 
 class StubService {
 
-  val requests: LinkedList[StubRequest] = new LinkedList
-  val responses: LinkedList[StubServiceExchange] = new LinkedList
+  val requests: Stack[StubRequest] = new Stack
+  val responses: Stack[StubServiceExchange] = new Stack
 
   def addResponse(exchange: StubExchange): Unit = {
     val internal = new StubServiceExchange(exchange);
 
     //responses.remove(internal); // remove existing stubed request (ie, will never match anymore)
-
-    responses.update(internal, new LinkedList(responses.tail)); // ensure most recent match first   
+    //responses.update(internal, new LinkedList(responses.tail)); // ensure most recent match first   
   }
 
 }
 
 /*
-
-
-
 
     public synchronized StubServiceResult findMatch(StubRequest request) {
         try {

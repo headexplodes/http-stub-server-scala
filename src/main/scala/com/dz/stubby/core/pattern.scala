@@ -1,12 +1,26 @@
 package com.dz.stubby.core
 
 import scala.util.matching.Regex
-import FieldType._
+import com.dz.stubby.core.model.FieldType._
+import com.dz.stubby.core.model.MatchField._
+import com.dz.stubby.core.model._
+import java.util.regex.Pattern
+
+class TextPattern(regex: String) extends Regex(regex) {
+  
+  override def equals(obj: Any) = obj match {
+    case r: Regex => pattern.pattern == r.pattern.pattern
+    case p: Pattern => pattern.pattern == p.pattern
+    case s: String => pattern.pattern == s
+    case _ => false
+  }
+  
+}
 
 object RequestPattern {
-   val DefaultPattern: Regex = new Regex(".*")
+   val DefaultPattern: TextPattern = new TextPattern(".*")
    
-   def toPattern(value: String): Regex = if (value != null) new Regex(value) else DefaultPattern
+   def toPattern(value: String): TextPattern = if (value != null) new TextPattern(value) else DefaultPattern
    
    def toPattern(params: List[StubParam]): Set[ParamPattern] = {
 //        Set<ParamPattern> pattern = new HashSet<ParamPattern>();
@@ -50,7 +64,8 @@ class RequestPattern(
         RequestPattern.toPattern(request.headers), 
         RequestPattern.toBodyPattern(request.body))   
     
-//    public MatchResult match(StubRequest message) {
+    def matches(message: StubRequest): MatchResult = {
+
 //        MatchResult result = new MatchResult();
 //
 //        MatchField methodField = new MatchField(MatchField.FieldType.METHOD, "method", method);
@@ -86,7 +101,8 @@ class RequestPattern(
 //        }
 //
 //        return result;
-//    }
+            null
+      }
 //
 //    private MatchField matchParam(StubRequest message, ParamPattern pattern) {
 //        MatchField field = new MatchField(FieldType.QUERY_PARAM, pattern.getName(), pattern.getPattern());
@@ -134,7 +150,7 @@ trait BodyPattern {
 case class TextBodyPattern(val pattern: Regex) extends BodyPattern {
     override def matches(request: StubMessage) = {
         val actual = HttpMessageUtils.bodyAsText(request);
-        val field = new PartialMatchField(FieldType.BODY, "body", pattern.pattern);
+        val field = new PartialMatchField(BODY, "body", pattern.pattern);
         if (HttpMessageUtils.isText(request)) { // require text body
             pattern.findFirstIn(actual) match { // match pattern against entire body
               case Some(_) => field.asMatch(actual)
