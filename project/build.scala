@@ -29,9 +29,8 @@ object Dependencies {
   )
 
   lazy val test = Seq(
-    //"org.scalatest" %% "scalatest" % "1.9.1" % "test" withSources()
-    "org.scalatest" %% "scalatest" % "2.0.M5b" % "test" withSources()
-    //"junit" % "junit" % "4.10" % "test" withSources()
+    "org.scalatest" %% "scalatest" % "2.0.M5b" % "test" withSources(),
+    "org.scalamock" %% "scalamock-scalatest-support" % "3.0.1" % "test" withSources()
   )
 
   lazy val all = unfiltered ++ runtime /*++ compile*/ ++ test
