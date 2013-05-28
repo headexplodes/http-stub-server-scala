@@ -6,12 +6,10 @@ import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 
 object JsonUtils {
 
-  def mapper = new ObjectMapper with ScalaObjectMapper
-
   def defaultMapper = {
-    val result = mapper
+    val mapper = new ObjectMapper with ScalaObjectMapper
     mapper.registerModule(DefaultScalaModule)
-    result
+    mapper
   }
   
   //def deserialize(str: String, toType: Class[_]) = defaultMapper.convertValue

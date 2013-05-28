@@ -1,9 +1,9 @@
 package com.dz.stubby.core.util
 
-import com.dz.stubby.core.model.StubMessage
-import scala.util.matching.Regex
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+
+import com.dz.stubby.core.model.StubMessage
 
 object HttpMessageUtils {
 
@@ -62,8 +62,9 @@ object HttpMessageUtils {
 
   def bodyAsJson(m: StubMessage): Any =
     m.body match {
-      case s: String => JsonUtils.defaultMapper.convertValue(s) //JsonUtils.deserialize(s, classOf[Object]) // support object or array as top-level
-      case Map | List => m // assume already parsed
+      case s: String => JsonUtils.defaultMapper.readValue(s, classOf[Object]) // support object or array as top-level
+      case s: Seq[_] => s // assume already parsed
+      case m: Map[_,_] => m // assume already parsed
       case _ => throw new RuntimeException("Unexpected body type: " + m.body.getClass)
     }
 
