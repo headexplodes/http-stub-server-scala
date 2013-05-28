@@ -4,23 +4,27 @@ case class StubParam(
   name: String,
   value: String)
 
-class StubMessage(
+abstract class StubMessage(
   val headers: List[StubParam],
-  val body: AnyRef)
+  val body: AnyRef) {
+  
+  def getHeader(name: String): Option[String] = headers.find(_.name.equalsIgnoreCase(name)).map(_.value)
+}
 
-class StubRequest(
-  val method: String,
-  val path: String,
-  val params: List[StubParam],
-  override val headers: List[StubParam],
-  override val body: AnyRef) extends StubMessage(headers, body)
+case class StubRequest(
+  val method: String = null,
+  val path: String = null,
+  val params: List[StubParam] = Nil,
+  override val headers: List[StubParam] = Nil,
+  override val body: AnyRef = null) extends StubMessage(headers, body) {
+}
 
-class StubResponse(
-  val status: Int,
-  override val headers: List[StubParam],
-  override val body: AnyRef) extends StubMessage(headers, body)
+case class StubResponse(
+  val status: Int = 0,
+  override val headers: List[StubParam] = Nil,
+  override val body: AnyRef = null) extends StubMessage(headers, body)
 
-class StubExchange(
+case class StubExchange(
   val request: StubRequest,
   val response: StubResponse,
   val delay: Long,

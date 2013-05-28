@@ -4,7 +4,7 @@ import scala.util.matching.Regex
 import com.dz.stubby.core.util.HttpMessageUtils
 import com.dz.stubby.core.model.StubMessage
 
-case class TextBodyPattern(val pattern: Regex) extends BodyPattern {
+case class TextBodyPattern(val pattern: TextPattern) extends BodyPattern {
   
     override def matches(request: StubMessage) = {
         val actual = HttpMessageUtils.bodyAsText(request);

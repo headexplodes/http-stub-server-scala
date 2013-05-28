@@ -55,7 +55,7 @@ object Main {
     
     //unfiltered.netty.Http(8080).plan(new AppPlan(new Server)).run()
     
-    val mapper = new ObjectMapper() with ScalaObjectMapper
+    val mapper = new ObjectMapper //with ScalaObjectMapper 
     mapper.registerModule(DefaultScalaModule)
         
   }
