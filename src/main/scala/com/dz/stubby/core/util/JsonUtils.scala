@@ -3,71 +3,35 @@ package com.dz.stubby.core.util
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import com.fasterxml.jackson.databind.DeserializationConfig
+import com.fasterxml.jackson.databind.ObjectWriter
+import com.fasterxml.jackson.annotation.JsonInclude.Include
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.DeserializationFeature
+import java.io.OutputStream
+import java.io.InputStream
 
 object JsonUtils {
 
-  def defaultMapper = {
+  def createDefaultMapper() = {
     val mapper = new ObjectMapper with ScalaObjectMapper
     mapper.registerModule(DefaultScalaModule)
+    mapper.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+    mapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS) // for 'exact' floating-point matches
+    mapper.setSerializationInclusion(Include.NON_NULL)
     mapper
   }
   
-  //def deserialize(str: String, toType: Class[_]) = defaultMapper.convertValue
+  lazy val defaultMapper = createDefaultMapper()
+  lazy val prettyWriter = defaultMapper.writerWithDefaultPrettyPrinter()
 
-  //
-  //    public static ObjectMapper mapper() {
-  //        return new ObjectMapper();
-  //    }
-  //    
-  //    public static ObjectMapper defaultMapper() {
-  //        ObjectMapper result = mapper();
-  //        result.enable(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES);
-  //        result.enable(DeserializationConfig.Feature.USE_BIG_DECIMAL_FOR_FLOATS); // for 'exact' floating-point matches
-  //        result.setSerializationInclusion(Inclusion.NON_NULL);
-  //        return result;
-  //    }
-  //    
-  //    public static ObjectWriter prettyWriter() {
-  //        return defaultMapper().writerWithDefaultPrettyPrinter();
-  //    }
-  //    
-  //    public static String prettyPrint(Object value) {
-  //        try {
-  //            return prettyWriter().writeValueAsString(value); 
-  //        } catch (IOException e) {
-  //            throw new RuntimeException("Error serializing JSON", e);
-  //        }
-  //    }
-  //
-  //    public static String serialize(Object object) {
-  //        try {
-  //            return defaultMapper().writeValueAsString(object);
-  //        } catch (IOException e) {
-  //            throw new RuntimeException("Error serializing JSON", e);
-  //        }
-  //    }
-  //    
-  //    public static void serialize(OutputStream stream, Object object) {
-  //        try {
-  //            defaultMapper().writeValue(stream, object);
-  //        } catch (IOException e) {
-  //            throw new RuntimeException("Error serializing JSON", e);
-  //        }
-  //    }
-  //
-  //    public static <T> T deserialize(String json, Class<T> type) {
-  //        try {
-  //            return defaultMapper().readValue(json, type);
-  //        } catch (IOException e) {
-  //            throw new RuntimeException("Error deserializing JSON", e);
-  //        }
-  //    }
+  def serialize(obj: AnyRef): String = defaultMapper.writeValueAsString(obj)
+  def serialize(stream: OutputStream, obj: AnyRef): Unit = defaultMapper.writeValue(stream, obj)
+  
+  def deserialize(str: String): AnyRef = defaultMapper.readValue(str, classOf[Object])
+  def deserialize[T: Manifest](str: String): T = defaultMapper.readValue[T](str)
+  def deserialize[T: Manifest](stream: InputStream): T = defaultMapper.readValue[T](stream)
+  
+  def prettyPrint(value: AnyRef): String = prettyWriter.writeValueAsString(value)
 
-  //    public static <T> T deserialize(InputStream stream, Class<T> type) {
-  //        try {
-  //            return defaultMapper().readValue(stream, type);
-  //        } catch (IOException e) {
-  //            throw new RuntimeException("Error deserializing JSON", e);
-  //        }
-  //    }
 }
