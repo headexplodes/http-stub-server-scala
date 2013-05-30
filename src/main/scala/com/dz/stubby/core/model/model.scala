@@ -8,7 +8,10 @@ abstract class StubMessage(
   val headers: List[StubParam],
   val body: AnyRef) {
   
-  def getHeader(name: String): Option[String] = headers.find(_.name.equalsIgnoreCase(name)).map(_.value)
+  def getHeader(name: String): Option[String] = 
+    headers.find(_.name.equalsIgnoreCase(name)).map(_.value)
+  def getHeaders(name: String): Seq[String] = 
+    headers.filter(_.name.equalsIgnoreCase(name)).map(_.value)
 }
 
 case class StubRequest(
@@ -17,6 +20,9 @@ case class StubRequest(
   val params: List[StubParam] = Nil,
   override val headers: List[StubParam] = Nil,
   override val body: AnyRef = null) extends StubMessage(headers, body) {
+  
+  def getParams(name: String): Seq[String] = 
+    params.filter(_.name == name).map(_.value)
 }
 
 case class StubResponse(
