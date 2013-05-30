@@ -5,36 +5,26 @@ import java.util.regex.Pattern
 import com.dz.stubby.core.model.StubRequest
 import com.dz.stubby.core.model.StubParam
 
-class RequestFilterBuilder { // TODO: make functional? :)
+object RequestFilterBuilder {
 
   val MethodParam = "method"
   val PathParam = "path"
   val ParamPattern = """^param\[(.+)\]$""".r
   val HeaderPattern = """^header\[(.+)\]$""".r
 
-  var method: String = null
-  var path: String = null
-  var params: ListBuffer[StubParam] = new ListBuffer
-  var headers: ListBuffer[StubParam] = new ListBuffer
+  def makeFilter(params: Seq[StubParam]): StubRequest =
+    params.foldLeft(new StubRequest)(addParam)
 
-  def getFilter =
-    new StubRequest(method, path, params.toList, headers.toList)
-
-  def fromParams(params: Seq[StubParam]): RequestFilterBuilder = {
-    params.foreach(p => addParam(p.name, p.value))
-    this
-  }
-
-  private def addParam(name: String, value: String) =
-    name match {
+  private def addParam(filter: StubRequest, param: StubParam): StubRequest =
+    param.name match {
       case MethodParam =>
-        method = value
+        filter.copy(method = param.value)
       case PathParam =>
-        path = value
+        filter.copy(path = param.value)
       case ParamPattern(paramName) =>
-        params += StubParam(paramName, value)
+        filter.copy(params = filter.params :+ StubParam(paramName, param.value))
       case HeaderPattern(headerName) =>
-        headers += StubParam(headerName, value)
+        filter.copy(headers = filter.headers :+ StubParam(headerName, param.value))
     }
 
 }
