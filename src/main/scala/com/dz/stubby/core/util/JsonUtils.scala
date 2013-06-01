@@ -28,7 +28,7 @@ object JsonUtils {
   def serialize(obj: AnyRef): String = defaultMapper.writeValueAsString(obj)
   def serialize(stream: OutputStream, obj: AnyRef): Unit = defaultMapper.writeValue(stream, obj)
   
-  def deserialize(str: String): AnyRef = defaultMapper.readValue(str, classOf[Object])
+  def deserializeObject(str: String): AnyRef = defaultMapper.readValue(str, classOf[Object])
   def deserialize[T: Manifest](str: String): T = defaultMapper.readValue[T](str)
   def deserialize[T: Manifest](stream: InputStream): T = defaultMapper.readValue[T](stream)
   

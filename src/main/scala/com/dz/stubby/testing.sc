@@ -1,17 +1,16 @@
-import com.dz.stubby.core.util._
+import com.dz.stubby.core.util.ListUtils
 
-case class Foo(foo: String)
+object testing {
 
-object testing2 {
+  val map: Map[String, String] = Map("foo" -> "bar")
+                                                  //> map  : Map[String,String] = Map(foo -> bar)
+  val unknown: Any = map                          //> unknown  : Any = Map(foo -> bar)
 
-  //val jsonContent = """{"test":"113123","myList":{"test2":"321323"}}"""
+  val matched: Map[_,Any] = unknown match {
+    case m: Map[_, _] => m
+  }                                               //> matched  : Map[_, Any] = Map(foo -> bar)
 
-  //JsonUtils.defaultMapper.readValue(jsonContent, classOf[Object])
+  val testing: Map[_,Any] = matched               //> testing  : Map[_, Any] = Map(foo -> bar)
 
-
-  val jsonContent = """{"foo":"bar"}"""           //> jsonContent  : String = {"foo":"bar"}
-
-  JsonUtils.defaultMapper.readValue[Foo](jsonContent)
-                                                  //> res0: Foo = Foo(bar)
-
+ 
 }

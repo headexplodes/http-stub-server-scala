@@ -14,6 +14,7 @@ abstract class StubMessage(
     headers.find(_.name.equalsIgnoreCase(name)).map(_.value)
   def getHeaders(name: String): Seq[String] =
     headers.filter(_.name.equalsIgnoreCase(name)).map(_.value)
+        
 }
 
 case class StubRequest(
@@ -27,6 +28,13 @@ case class StubRequest(
     params.find(_.name.equalsIgnoreCase(name)).map(_.value)
   def getParams(name: String): Seq[String] =
     params.filter(_.name == name).map(_.value)
+    
+  def addHeader(name: String, value: String): StubRequest =
+    this.copy(headers = headers :+ StubParam(name, value))
+  def removeHeader(name: String): StubRequest =
+    this.copy(headers = headers.filterNot(_.name.equalsIgnoreCase(name)))
+  def setHeader(name: String, value: String): StubRequest =
+    removeHeader(name).setHeader(name, value)
 }
 
 case class StubResponse(

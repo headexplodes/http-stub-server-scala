@@ -1,24 +1,14 @@
 package com.dz.stubby.core.js
 
 import java.util.ArrayList
-import scala.beans.BeanInfo
-import scala.beans.BeanProperty
+
+import com.dz.stubby.core.model.StubExchange
 import com.dz.stubby.core.model.StubMessage
 import com.dz.stubby.core.model.StubParam
 import com.dz.stubby.core.model.StubRequest
 import com.dz.stubby.core.model.StubResponse
-import scala.collection.JavaConversions
-import com.dz.stubby.core.model.StubExchange
-import java.util.Collection
-
-object ListUtils {
-  def toJavaList[T](list: Seq[T]): ArrayList[T] =
-    new ArrayList(JavaConversions.seqAsJavaList(list))
-  def toScalaList[T](collection: Collection[T]): List[T] =
-    JavaConversions.collectionAsScalaIterable(collection).toList
-}
-
-import ListUtils._
+import com.dz.stubby.core.util.ListUtils.toJavaList
+import com.dz.stubby.core.util.ListUtils.toScalaList
 
 abstract class ScriptMessage(message: StubMessage) {
   def getBody: AnyRef = message.body
@@ -58,9 +48,9 @@ case class ScriptResponse(
   }
 
   def getHeaders: ArrayList[StubParam] = headers
-  def getHeaders(name: String): ArrayList[String] = 
+  def getHeaders(name: String): ArrayList[String] =
     toJavaList(toScalaList(headers).filter(_.name.equalsIgnoreCase(name)).map(_.value))
-  def getHeader(name: String): String = 
+  def getHeader(name: String): String =
     toScalaList(headers).find(_.name.equalsIgnoreCase(name)).map(_.value).orNull
 
   def removeHeader(name: String): Unit = {
@@ -70,7 +60,7 @@ case class ScriptResponse(
     removeHeader(name)
     headers.add(StubParam(name, value))
   }
-    
+
   def toStubResponse: StubResponse =
     new StubResponse(status, toScalaList(headers), body)
 }
@@ -80,7 +70,7 @@ class ScriptWorld(
     private val response: ScriptResponse,
     private var delay: Long) {
 
-  def this(exchange: StubExchange) = this(
+  def this(exchange: StubExchange) = this( // TODO: need to perform (and test) deep copy of response JSON
     new ScriptRequest(exchange.request),
     new ScriptResponse(exchange.response),
     exchange.delay)
