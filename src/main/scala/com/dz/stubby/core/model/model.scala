@@ -34,7 +34,7 @@ case class StubRequest(
   def removeHeader(name: String): StubRequest =
     this.copy(headers = headers.filterNot(_.name.equalsIgnoreCase(name)))
   def setHeader(name: String, value: String): StubRequest =
-    removeHeader(name).setHeader(name, value)
+    removeHeader(name).addHeader(name, value)
 }
 
 case class StubResponse(

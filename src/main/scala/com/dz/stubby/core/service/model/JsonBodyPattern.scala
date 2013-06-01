@@ -46,10 +46,16 @@ class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
    * 
    * An empty object pattern matches any request object.
    */
-  private def matchObject(pattern: Map[String, Any], request: Map[String, Any], path: String): MatchResult = {
+  private def matchObject(pattern: collection.Map[String, Any], request: collection.Map[String, Any], path: String): MatchResult = {
     val result =
-      for (key <- pattern.keySet)
-        yield  matchValue(pattern(key), request(key), path + "." + key)
+      for (key <- pattern.keySet) yield {
+        val childPath = path + "." + key
+        if (request.contains(key)) {
+            matchValue(pattern(key), request(key), childPath)
+        } else {
+            matchFailure("Property '%s' expected".format(key), childPath)
+        }
+      }
 
     result.find(!_.matches).getOrElse(matchSuccess()) // empty pattern matches any object
   }
@@ -64,8 +70,8 @@ class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
   private def matchArray(pattern: Seq[Any], request: Seq[Any], path: String): MatchResult = {
     val attempts = for ( // attempt to match every pattern element with each request element
       r <- request.zipWithIndex;
-      p <- pattern.zipWithIndex
-    ) yield (p, matchValue(p._1, r._1, path + "[" + r._2 + "]"))
+      p <- pattern
+    ) yield (p, matchValue(p, r._1, path + "[" + r._2 + "]"))
 
     val matches = attempts.filter(_._2.matches) // filter out unsuccessful matches
     val compressed = compress(matches.map(_._1)) // list the patterns that matched in order
@@ -73,7 +79,8 @@ class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
     if (pattern == compressed) { // if all matched, and in correct order
       return matchSuccess()
     } else {
-      return matches.find(!_._2.matches).get._2 // just report first failed match
+      return matches.map(_._2).find(!_.matches).getOrElse(
+          matchFailure("Array elements expected in different order", path)) // just report first failed match
     }
   }
 
@@ -133,15 +140,15 @@ class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
         case _ => matchFailure("Boolean expected", path)
       }
 
-      case patternList: List[_] => request match {
-        case requestList: List[_] => matchArray(patternList, requestList, path)
+      case patternList: Seq[_] => request match {
+        case requestList: Seq[_] => matchArray(patternList, requestList, path)
         case _ => matchFailure("Array expected", path)
 
       }
 
       // TODO: fix these warnings...
-      case patternMap: Map[String, Any] => request match {
-        case requestMap: Map[String, Any] => matchObject(patternMap, requestMap, path) // recursively match objects
+      case patternMap: collection.Map[String, Any] => request match {
+        case requestMap: collection.Map[String, Any] => matchObject(patternMap, requestMap, path) // recursively match objects
         case _ => matchFailure("Object expected", path)
       }
 

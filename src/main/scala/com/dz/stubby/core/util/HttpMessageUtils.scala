@@ -64,7 +64,7 @@ object HttpMessageUtils {
     m.body match {
       case s: String => JsonUtils.defaultMapper.readValue(s, classOf[Object]) // support object or array as top-level
       case s: Seq[_] => s // assume already parsed
-      case m: Map[_,_] => m // assume already parsed
+      case m: scala.collection.Map[_,_] => m // assume already parsed
       case _ => throw new RuntimeException("Unexpected body type: " + m.body.getClass)
     }
 
