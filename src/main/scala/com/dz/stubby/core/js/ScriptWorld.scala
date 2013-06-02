@@ -70,10 +70,10 @@ class ScriptWorld(
     private val response: ScriptResponse,
     private var delay: Long) {
 
-  def this(exchange: StubExchange) = this( // TODO: need to perform (and test) deep copy of response JSON
-    new ScriptRequest(exchange.request),
-    new ScriptResponse(exchange.response),
-    exchange.delay)
+  def this(request: StubRequest, response: StubExchange) = this( // TODO: need to perform (and test) deep copy of response JSON
+    new ScriptRequest(request),
+    new ScriptResponse(response.response),
+    response.delay)
 
   def getDelay: Long = delay
   def setDelay(delay: Long): Unit = {
@@ -83,7 +83,7 @@ class ScriptWorld(
   def getRequest: ScriptRequest = request
   def getResponse: ScriptResponse = response
 
-  def toStubExchange: StubExchange =
+  def toStubExchange: StubExchange = // TODO: don't care about the requets, it's read only...
     new StubExchange(request.toStubRequest, response.toStubResponse, delay)
 
 }

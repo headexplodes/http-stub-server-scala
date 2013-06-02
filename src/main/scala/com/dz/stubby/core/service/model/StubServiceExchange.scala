@@ -18,7 +18,7 @@ class StubServiceExchange(val exchange: StubExchange) { // wrap exchange model w
   }
 
   override def toString = requestPattern.toString
-  override def hashCode = requestPattern.hashCode(); // hash/equality is based on the request pattern only
+  override def hashCode = requestPattern.hashCode // hash/equality is based on the request pattern only
   override def equals(obj: Any) = obj match {
     case e: StubServiceExchange => e.requestPattern.equals(requestPattern)
     case _ => false
