@@ -12,4 +12,7 @@ case class TextPattern(regex: String) extends Regex(regex) {
     case _ => false
   }
   
+  def matches(str: String): Boolean = 
+    this.findFirstIn(str).nonEmpty
+      
 }

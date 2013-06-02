@@ -3,123 +3,120 @@ package com.dz.stubby.core.service.model
 import scala.util.matching.Regex
 import com.dz.stubby.core.model.StubParam
 import com.dz.stubby.core.model.StubRequest
+import scala.annotation.meta.field
+import com.dz.stubby.core.model.StubMessage
 
 object RequestPattern {
-   val DefaultPattern: TextPattern = new TextPattern(".*")
-   
-   def toPattern(value: String): TextPattern = if (value != null) new TextPattern(value) else DefaultPattern
-   
-   def toPattern(params: List[StubParam]): Set[ParamPattern] = {
-//        Set<ParamPattern> pattern = new HashSet<ParamPattern>();
-//        if (params != null) {
-//            for (StubParam param : params) {
-//                pattern.add(new ParamPattern(param.getName(), toPattern(param.getValue())));
-//            }
-//        }
-//        return pattern;
-     null
-    }
-   
-    def toBodyPattern(obj: Any): BodyPattern = {
-//        if (object != null) {
-//            if (object instanceof String) {
-//                return new TextBodyPattern(object.toString());
-//            } else if (object instanceof Map
-//                    || object instanceof List) {
-//                return new JsonBodyPattern(object);
-//            } else {
-//                throw new RuntimeException("Unexpected body type: " + object);
-//            }
-//        } else {
-//            return null; // don't match body
-//        }
-           null
-    }
+  //val DefaultPattern: TextPattern = new TextPattern(".*")
+
+  def toPattern(value: String): TextPattern = {
+    if (value != null) new TextPattern(value) else null
+  }
+
+  def toPattern(params: List[StubParam]): Set[ParamPattern] = {
+    params.map(p => new ParamPattern(p.name, p.value)).toSet
+  }
+
+  def toBodyPattern(obj: AnyRef): BodyPattern = obj match {
+    case null => null
+    case str: String => new TextBodyPattern(str)
+    case coll @ (_: Map[_, _] | _: List[_]) => new JsonBodyPattern(coll)
+    case _ => throw new RuntimeException("Unexpected body type: " + obj.getClass)
+  }
 }
 
-class RequestPattern(
-    val method: Regex, 
-    val path: Regex, 
-    val params: Set[ParamPattern], 
-    val headers: Set[ParamPattern], 
-    val body: BodyPattern) {    
-  
-    def this(request: StubRequest) = this(
-        RequestPattern.toPattern(request.method), 
-        RequestPattern.toPattern(request.path), 
-        RequestPattern.toPattern(request.params), 
-        RequestPattern.toPattern(request.headers), 
-        RequestPattern.toBodyPattern(request.body))   
-    
-    def matches(message: StubRequest): MatchResult = {
+case class RequestPattern(
+    val method: TextPattern,
+    val path: TextPattern,
+    val params: Set[ParamPattern], // TODO: ensure not serialized when empty
+    val headers: Set[ParamPattern],
+    val body: BodyPattern) {
 
-//        MatchResult result = new MatchResult();
-//
-//        MatchField methodField = new MatchField(MatchField.FieldType.METHOD, "method", method);
-//        if (method != null) {
-//            if (method.matcher(message.getMethod()).matches()) {
-//                result.add(methodField.asMatch(message.getMethod()));
-//            } else {
-//                result.add(methodField.asMatchFailure(message.getMethod()));
-//            }
-//        }
-//
-//        MatchField pathField = new MatchField(FieldType.PATH, "path", path);
-//        if (path.matcher(message.getPath()).matches()) {
-//            result.add(pathField.asMatch(message.getPath()));
-//        } else {
-//            result.add(pathField.asMatchFailure(message.getPath()));
-//        }
-//
-//        for (ParamPattern paramPattern : params) {
-//            result.add(matchParam(message, paramPattern));
-//        }
-//
-//        for (ParamPattern headerPattern : headers) {
-//            result.add(matchHeader(message, headerPattern));
-//        }
-//
-//        if (body != null) {
-//            if (message.getBody() != null) {
-//                result.add(body.matches(message));
-//            } else {
-//                result.add(new MatchField(FieldType.BODY, "body", "<pattern>").asNotFound());
-//            }
-//        }
-//
-//        return result;
-            null
+  def this(request: StubRequest) = this(
+    RequestPattern.toPattern(request.method),
+    RequestPattern.toPattern(request.path),
+    RequestPattern.toPattern(request.params),
+    RequestPattern.toPattern(request.headers),
+    RequestPattern.toBodyPattern(request.body))
+
+  def matches(message: StubRequest): MatchResult = {
+
+    def matchMethod: Option[MatchField] = {
+      val methodField = new PartialMatchField(FieldType.METHOD, "method", method)
+      if (method != null) {
+        if (method.findFirstIn(message.method).nonEmpty) {
+          Some(methodField.asMatch(message.method))
+        } else {
+          Some(methodField.asMatchFailure(message.method))
+        }
+      } else {
+        None
       }
-//
-//    private MatchField matchParam(StubRequest message, ParamPattern pattern) {
-//        MatchField field = new MatchField(FieldType.QUERY_PARAM, pattern.getName(), pattern.getPattern());
-//        List<String> values = message.getParams(pattern.getName());
-//        if (!values.isEmpty()) {
-//            for (String value : values) {
-//                if (pattern.getPattern().matcher(value).matches()) {
-//                    return field.asMatch(value);
-//                }
-//            }
-//            return field.asMatchFailure(values.size() > 1 ? values : values.get(0)); // don't wrap in array if only single value
-//        } else {
-//            return field.asNotFound();
-//        }
-//    }
-//
-//    private MatchField matchHeader(StubMessage message, ParamPattern pattern) {
-//        MatchField field = new MatchField(FieldType.HEADER, pattern.getName(), pattern.getPattern());
-//        List<String> values = message.getHeaders(pattern.getName()); // case insensitive lookup
-//        if (!values.isEmpty()) {
-//            for (String value : values) {
-//                if (pattern.getPattern().matcher(value).matches()) {
-//                    return field.asMatch(value);
-//                }
-//            }
-//            return field.asMatchFailure(values.size() > 1 ? values : values.get(0)); // don't wrap in array if only single value
-//        } else {
-//            return field.asNotFound();
-//        }
-//    }
+    }
 
+    def matchPath: Option[MatchField] = {
+      val pathField = new PartialMatchField(FieldType.PATH, "path", path)
+      if (path.findFirstIn(message.path).nonEmpty) {
+        Some(pathField.asMatch(message.path))
+      } else {
+        Some(pathField.asMatchFailure(message.path))
+      }
+    }
+
+    def matchBody: Option[MatchField] = {
+      val bodyField = new PartialMatchField(FieldType.BODY, "body", "<pattern>")
+      if (body != null) {
+        if (message.body != null) {
+          Some(body.matches(message))
+        } else {
+          Some(bodyField.asNotFound)
+        }
+      } else {
+        None
+      }
+    }
+
+    def matchParamValues(values: Seq[String], field: PartialMatchField, pattern: ParamPattern): MatchField = {
+      if (values.isEmpty) {
+        field.asNotFound
+      } else {
+        values.find(p => pattern.pattern.matches(p)) match {
+          case Some(v) => field.asMatch(v)
+          case None => field.asMatchFailure(if (values.size > 1) values else values.head) // don't wrap in array if only single value
+        }
+      }
+    }
+
+    def matchParam(pattern: ParamPattern): MatchField = {
+      matchParamValues(
+        message.getParams(pattern.name), // case insensitive lookup
+        new PartialMatchField(FieldType.QUERY_PARAM, pattern.name, pattern.pattern),
+        pattern)
+    }
+
+    def matchHeader(pattern: ParamPattern): MatchField = {
+      matchParamValues(
+        message.getHeaders(pattern.name), // case insensitive lookup
+        new PartialMatchField(FieldType.HEADER, pattern.name, pattern.pattern),
+        pattern)
+    }
+
+    def matchParams = {
+      params.map(paramPattern => matchParam(paramPattern))
+    }
+
+    def matchHeaders = {
+      headers.map(headerPattern => matchHeader(headerPattern))
+    }
+
+    val fields =
+      matchMethod ++
+        matchPath ++
+        matchParams ++
+        matchHeaders ++
+        matchBody
+
+    MatchResult(fields.toList)
+  }
 
 }
