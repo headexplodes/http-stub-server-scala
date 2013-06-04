@@ -21,14 +21,12 @@ class ScriptTest extends FunSuite {
     headers = List(StubParam("Content-Type", "application/json")),
     body = "response body")
 
-  val exchange = new StubExchange(request, response, 1234, "script()")
-
   class TestBean {
     private val items = new ArrayList[String]
     def getItems: ArrayList[String] = items
   }
 
-  implicit def createWorld: ScriptWorld = new ScriptWorld(exchange)
+  implicit def createWorld: ScriptWorld = new ScriptWorld(request, response, Some(1234L))
 
   def createWorldWithJsonBodies: ScriptWorld = {
     val bodyBean = new TestBean
@@ -38,9 +36,7 @@ class ScriptTest extends FunSuite {
     val jsonRequest = request.copy(body = bodyBean)
     val jsonResponse = response.copy(body = bodyBean)
 
-    val exchange = new StubExchange(jsonRequest, jsonResponse)
-
-    new ScriptWorld(exchange)
+    new ScriptWorld(jsonRequest, jsonResponse, Some(1234L))
   }
 
   def executeScript(script: String)(implicit world: ScriptWorld): Any =
@@ -89,16 +85,16 @@ class ScriptTest extends FunSuite {
     val world = createWorld
 
     executeScript("exchange.response.status = 501")(world)
-    assert(world.toStubExchange.response.status === 501)
+    assert(world.result._1.status === 501)
 
     executeScript("exchange.response.setHeader('Content-Type', 'text/xml')")(world)
-    assert(world.toStubExchange.response.getHeader("content-type") === Some("text/xml")) // ensure case insensitive
+    assert(world.result._1.getHeader("content-type") === Some("text/xml")) // ensure case insensitive
 
     executeScript("exchange.response.removeHeader('Content-Type')")(world)
-    assert(world.toStubExchange.response.getHeader("content-type") === None)
+    assert(world.result._1.getHeader("content-type") === None)
 
     executeScript("exchange.response.body = 'foo'")(world)
-    assert(world.toStubExchange.response.body === "foo")
+    assert(world.result._1.body === "foo")
   }
 
   test("get request JSON body") {

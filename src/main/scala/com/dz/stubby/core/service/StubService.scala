@@ -31,13 +31,14 @@ class StubService {
           //LOGGER.info("Matched: " + request.getPath() + "")
           val exchange = response.exchange
           if (exchange.script != null) {
-            val world = new ScriptWorld(request, exchange) // creates deep copies of objects
+            val world = new ScriptWorld(request, exchange.response, Some(exchange.delay)) // creates deep copies of objects
             new Script(exchange.script).execute(world)
+            val (scriptResponse, scriptDelay) = world.result
             return new StubServiceResult(
-              attempts.toList, world.toStubExchange.response, world.toStubExchange.delay)
+              attempts.toList, Some(scriptResponse), scriptDelay)
           } else {
             return new StubServiceResult(
-              attempts.toList, exchange.response, exchange.delay);
+              attempts.toList, Some(exchange.response), Some(exchange.delay))
           }
         }
       }

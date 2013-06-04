@@ -25,8 +25,6 @@ class ScriptRequest(request: StubRequest) extends ScriptMessage(request) {
   def getParams = toJavaList(request.params)
   def getParams(name: String): ArrayList[String] = toJavaList(request.getParams(name))
   def getParam(name: String): String = request.getParam(name).orNull
-
-  def toStubRequest: StubRequest = request
 }
 
 case class ScriptResponse(
@@ -68,22 +66,21 @@ case class ScriptResponse(
 class ScriptWorld(
     private val request: ScriptRequest,
     private val response: ScriptResponse,
-    private var delay: Long) {
+    private var delay: Option[Long] = None) {
 
-  def this(request: StubRequest, response: StubExchange) = this( // TODO: need to perform (and test) deep copy of response JSON
+  def this(request: StubRequest, response: StubResponse, delay: Option[Long]) = this( // TODO: need to perform (and test) deep copy of response JSON
     new ScriptRequest(request),
-    new ScriptResponse(response.response),
-    response.delay)
+    new ScriptResponse(response),
+    delay)
 
-  def getDelay: Long = delay
-  def setDelay(delay: Long): Unit = {
-    this.delay = delay
+  def getDelay: java.lang.Long = delay.getOrElse(null.asInstanceOf[Long]).longValue
+  def setDelay(delay: java.lang.Long): Unit = {
+    this.delay = if (delay == null) null else Some(delay)
   }
 
   def getRequest: ScriptRequest = request
   def getResponse: ScriptResponse = response
 
-  def toStubExchange: StubExchange = // TODO: don't care about the requets, it's read only...
-    new StubExchange(request.toStubRequest, response.toStubResponse, delay)
+  def result: Pair[StubResponse,Option[Long]] = (response.toStubResponse, delay)
 
 }
