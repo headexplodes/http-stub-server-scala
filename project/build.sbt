@@ -1,6 +1,6 @@
 resolvers += Classpaths.typesafeResolver
 
-resolvers += "spray repo" at "http://repo.spray.cc"
+//resolvers += "spray repo" at "http://repo.spray.cc"
 
 resolvers += "scala-tools" at "https://oss.sonatype.org/content/groups/scala-tools"
 
@@ -8,5 +8,4 @@ resolvers += "scala-tools" at "https://oss.sonatype.org/content/groups/scala-too
 
 addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.1.0")
 
-addSbtPlugin("cc.spray" % "sbt-revolver" % "0.6.1")
-
+//addSbtPlugin("cc.spray" % "sbt-revolver" % "0.6.1")

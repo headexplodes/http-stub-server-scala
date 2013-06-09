@@ -1,6 +1,48 @@
 import sbt._
 import sbt.Keys._
 
+object BuildSettings {
+  
+  val buildSettings = Defaults.defaultSettings ++ Seq(
+    organization := "com.dz",
+    version := "0.1",
+    scalaVersion := "2.10.1",
+    scalacOptions ++= Seq()
+  )
+  
+}
+
+object RootBuild extends Build {
+
+  import BuildSettings._
+
+  lazy val coreSettings = (
+    buildSettings
+    ++ Seq(libraryDependencies ++= Dependencies.all)
+    ++ Seq(mainClass := Some("com.dz.stubby.Main")))
+  
+  lazy val root = Project(
+    id = "root",
+    base = file("."),
+    settings = buildSettings) aggregate (core, standalone, functionalTest)
+
+  lazy val core = Project(
+    id = "core",
+    base = file("core"),
+    settings = coreSettings)
+
+  lazy val standalone = Project(
+    id = "standalone",
+    base = file("standalone"),
+    settings = buildSettings)
+
+  lazy val functionalTest = Project(
+    id = "functionalTest",
+    base = file("functional-test"),
+    settings = buildSettings)
+    
+}
+
 object Dependencies {
 
   val unfiltered = Seq(
@@ -12,20 +54,10 @@ object Dependencies {
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.2.1" withSources(),
     "com.fasterxml.jackson.core" % "jackson-core" % "2.2.1" withSources(),
     "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.1" withSources()
-    
-    //"net.databinder" %% "unfiltered-scalate" % "0.6.8" withSources (),
-    //"net.databinder" %% "unfiltered-json" % "0.6.8" withSources ()
   )
 
   lazy val runtime = Seq(
-  //  "ch.qos.logback" % "logback-classic" % "0.9.25" withSources (),
-  //  "org.clapper" %% "grizzled-slf4j" % "0.6.6",
-  //  "org.slf4j" % "jcl-over-slf4j" % "1.6.2" withSources (),
     "org.apache.commons" % "commons-lang3" % "3.1"
-  )
-
-  lazy val compile = Seq(
-    "org.scala-sbt" % "sbt_2.9.1" % "0.11.3" % "compile"
   )
 
   lazy val test = Seq(
@@ -33,28 +65,6 @@ object Dependencies {
     "org.scalamock" %% "scalamock-scalatest-support" % "3.0.1" % "test" withSources()
   )
 
-  lazy val all = unfiltered ++ runtime /*++ compile*/ ++ test
-
-}
-
-object AppBuild extends Build {
-
-  val buildName = "http-stub-server"
-  val buildOrganization = "com.dz"
-  val buildVersion = "0.1"
-  val buildScalaVersion = "2.10.1"
-
-  lazy val buildSettings = Defaults.defaultSettings ++ Seq(
-    organization := buildOrganization,
-    version := buildVersion,
-    scalaVersion := buildScalaVersion
-  )
-
-  lazy val projectSettings = (
-    buildSettings
-    ++ Seq(libraryDependencies ++= Dependencies.all)
-    ++ Seq(mainClass := Some("com.dz.stubby.Main")))
-
-  lazy val project = Project(buildName, file("."), settings = projectSettings)
+  lazy val all = unfiltered ++ runtime ++ test
 
 }
