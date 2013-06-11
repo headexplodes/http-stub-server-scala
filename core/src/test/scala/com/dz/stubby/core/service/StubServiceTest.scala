@@ -1,212 +1,186 @@
 package com.dz.stubby.core.service
 
 import org.scalatest.FunSuite
+import com.dz.stubby.core.model.StubRequest
+import com.dz.stubby.core.model.StubExchange
+import com.dz.stubby.core.model.StubResponse
+import com.dz.stubby.core.model.StubParam
 
 class StubServiceTest extends FunSuite {
 
-//    private static final Integer OK = 200;
-//    private static final Integer CREATED = 201;
-//    private static final Integer SERVER_ERROR = 500;
-//
-//    private StubRequest request; // incoming request
-//    private StubExchange exchange; // stubbed exchange
-//    private StubService service;
-//
-//    @Before
-//    public void before() {
-//        service = new StubService();
-//
-//        request = new StubRequest();
-//
-//        exchange = new StubExchange();
-//        exchange.setRequest(new StubRequest());
-//        exchange.setResponse(new StubResponse());
-//
-//        givenDefaultRequest();
-//        givenDefaultExchange();
-//        givenDefaultService();
-//    }
-//
-//    private void givenDefaultRequest() {
-//        request.setMethod("GET");
-//        request.setPath("/foo");
-//    }
-//
-//    private void givenDefaultExchange() {
-//        exchange.getRequest().setMethod("GET");
-//        exchange.getRequest().setPath("/foo");
-//        exchange.getResponse().setStatus(OK);
-//    }
-//
-//    private void givenDefaultService() {
-//        exchange.getResponse().setStatus(OK);
-//        exchange.getRequest().setMethod("G.T");
-//        service.addResponse(new StubExchange(exchange)); // create copy
-//
-//        exchange.getResponse().setStatus(CREATED);
-//        exchange.getRequest().setMethod("GE."); // make sure patterns differ (or they will overwrite eachother)
-//        service.addResponse(new StubExchange(exchange));
-//
-//        assertEquals(2, service.getResponses().size());
-//    }
-//
-//    @Test
-//    public void testMatch() {
-//        StubServiceResult result = service.findMatch(request);
-//
-//        assertTrue(result.matchFound());
-//        assertEquals(CREATED, result.getResponse().getStatus()); // most recent stubbed first
-//        assertEquals(1, result.getAttempts().size()); // ensure attempts returned
-//    }
-//    
-//    @Test
-//    public void testAttemptRecorded() {
-//        service.findMatch(request);
-//
-//        StubServiceExchange response = service.getResponse(0);
-//        assertEquals(1, response.getAttempts().size());
-//        assertTrue(response.getAttempts().get(0).matches());
-//    }
-//
-//    @Test
-//    public void testNoMatch() {
-//        service.addResponse(exchange);
-//        request.setPath("/not/found");
-//
-//        assertFalse(service.getResponses().isEmpty());
-//        assertFalse(service.findMatch(request).matchFound());
-//    }
-//
-//    @Test
-//    public void testDeleteResponses() {
-//        service.deleteResponses();
-//
-//        assertFalse(service.findMatch(request).matchFound());
-//    }
-//
-//    @Test
-//    public void testDeleteResponse() {
-//        service.deleteResponse(0); // delete first
-//
-//        StubServiceResult result = service.findMatch(request);
-//
-//        assertTrue(result.matchFound());
-//        assertEquals(OK, result.getResponse().getStatus());
-//    }
-//
-//    @Test
-//    public void testGetResponses() {
-//        assertEquals(CREATED, service.getResponses().get(0).getExchange().getResponse().getStatus()); // most recent first
-//        assertEquals(OK, service.getResponses().get(1).getExchange().getResponse().getStatus());
-//    }
-//
-//    @Test
-//    public void testRequestsRecorded() {
-//        request.setPath("/foo");
-//        assertTrue(service.findMatch(new StubRequest(request)).matchFound());
-//
-//        request.setPath("/not/found");
-//        assertFalse(service.findMatch(new StubRequest(request)).matchFound()); // ensure even failed matches recorded
-//
-//        assertEquals("/not/found", service.getRequests().get(0).getPath()); // most recent first
-//        assertEquals("/foo", service.getRequests().get(1).getPath());
-//    }
-//
-//    @Test
-//    public void testDelay() {
-//        exchange.setDelay(1234L);
-//        service.addResponse(exchange);
-//
-//        StubServiceResult result = service.findMatch(request);
-//
-//        assertTrue(result.matchFound());
-//        assertEquals(new Long(1234), result.getDelay());
-//    }
-//
-//    @Test
-//    public void testScriptExecuted() {
-//        exchange.setScript("exchange.response.status = 500; exchange.delay = 666; exchange.response.body = exchange.request.path");
-//        service.addResponse(exchange);
-//
-//        StubServiceResult result = service.findMatch(request);
-//
-//        assertTrue(result.matchFound());
-//        assertEquals(SERVER_ERROR, result.getResponse().getStatus());
-//        assertEquals(new Long(666), result.getDelay());
-//        assertEquals("/foo", result.getResponse().getBody());
-//    }
-//
-//    @Test
-//    public void testDuplicatePatternRemoved() {
-//        service.deleteResponses();
-//
-//        exchange.getResponse().setStatus(OK);
-//        service.addResponse(new StubExchange(exchange)); // create copies
-//
-//        exchange.getResponse().setStatus(CREATED);
-//        service.addResponse(new StubExchange(exchange));
-//
-//        assertEquals(1, service.getResponses().size());
-//        assertEquals(CREATED, // ensure last stubbed request is kept
-//                service.getResponses().get(0).getExchange().getResponse().getStatus());
-//    }
-//    
-//    @Test
-//    public void testRequestFilterEmpty() {
-//        request.setPath("/test");
-//        service.findMatch(new StubRequest(request));
-//        assertEquals(1, service.findRequests(new StubRequest()).size()); // empty filter
-//    }
-//    
-//    @Test
-//    public void testRequestFilter() {
-//        request.setPath("/test");
-//        service.findMatch(new StubRequest(request));
-//        
-//        request.setPath("/test");
-//        request.setParams(Arrays.asList(new StubParam("foo", "bar")));
-//        service.findMatch(new StubRequest(request));
-//        
-//        assertEquals(2, service.getRequests().size());
-//        
-//        StubRequest filter = new StubRequest();
-//        filter.setParams(Arrays.asList(new StubParam("foo", "b.r")));
-//        assertEquals(1, service.findRequests(filter).size()); // should only match one of the requests
-//    }
-//
-//    @Test
-//    public void testRequestFilterWaitNotFound() {
-//        request.setPath("/test");
-//        service.findMatch(new StubRequest(request));
-//
-//        StubRequest filter = new StubRequest();
-//        filter.setPath("/foo");
-//
-//        assertEquals(0, service.findRequests(new StubRequest(filter), 100).size());
-//    }
-//
-//    @Test
-//    public void testRequestFilterWait() {
-//        request.setPath("/test1");
-//        service.findMatch(new StubRequest(request));
-//
-//        new Thread(new Runnable() {
-//            public void run() {
-//                try {
-//                    Thread.sleep(1000); // attempt to make 'findMatch' execute after parent thread starts waiting
-//                    request.setPath("/test2");
-//                    service.findMatch(new StubRequest(request));
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }).start();
-//
-//        StubRequest filter = new StubRequest();
-//        filter.setPath("/test2"); // wait for second request
-//
-//        List<StubRequest> result = service.findRequests(new StubRequest(filter), 5000);
-//        assertEquals(1, result.size());
-//    }
-  
+  val OK = 200
+  val CREATED = 201
+  val SERVER_ERROR = 500
+
+  def defaultService = {
+    val result = new StubService
+    result.addResponse(
+      StubExchange(
+        StubRequest(path = "/foo", method = "G.T"),
+        StubResponse(status = OK)))
+    result.addResponse(
+      StubExchange(
+        StubRequest(path = "/foo", method = "GE."), // make sure patterns differ (or they will overwrite eachother)
+        StubResponse(status = CREATED)))
+    result
+  }
+
+  def defaultRequest = // default incoming request
+    StubRequest(method = "GET", path = "/foo")
+
+  test("successful match") {
+    val result = defaultService.findMatch(defaultRequest)
+
+    assert(result.matchFound)
+    assert(result.response.get.status === CREATED) // most recent stubbed first
+    assert(result.attempts.size === 1) // ensure attempts returned
+  }
+
+  test("match attempt recorded") {
+    val service = defaultService
+    service.findMatch(defaultRequest)
+
+    val response = service.responses(0)
+    assert(response.attempts.size === 1)
+    assert(response.attempts(0).matches)
+  }
+
+  test("no match") {
+    val service = defaultService
+    service.findMatch(StubRequest(path = "/not/found"))
+
+    assert(service.responses.nonEmpty)
+    assert(!service.findMatch(defaultRequest).matchFound)
+  }
+
+  test("delete responses") {
+    val service = defaultService
+    service.deleteResponses
+
+    assert(!service.findMatch(defaultRequest).matchFound)
+  }
+
+  test("delete response") {
+    val service = defaultService
+    service.deleteResponse(0) // delete first
+
+    val result = service.findMatch(defaultRequest)
+    assert(result.matchFound)
+    assert(result.response.get.status === OK)
+  }
+
+  test("get responses") {
+    val service = defaultService
+
+    assert(service.responses(0).exchange.response.status === CREATED) // most recent first
+    assert(service.responses(1).exchange.response.status === OK)
+  }
+
+  test("requests are recorded") {
+    val service = defaultService
+
+    assert(service.findMatch(defaultRequest.copy(path = "/foo")).matchFound)
+    assert(!service.findMatch(defaultRequest.copy(path = "/not/found")).matchFound) // ensure even failed matches recorded
+
+    assert(service.requests(0).path === "/not/found") // most recent first
+    assert(service.requests(1).path === "/foo")
+  }
+
+  test("delay") {
+    val service = new StubService
+    service.addResponse(
+      StubExchange(
+        StubRequest(path = "/foo"),
+        StubResponse(status = OK),
+        delay = 1234))
+
+    val result = service.findMatch(StubRequest(path = "/foo"))
+
+    assert(result.matchFound)
+    assert(result.delay.get === 1234)
+  }
+
+  test("script executed") {
+    val service = new StubService
+    service.addResponse(
+      StubExchange(
+        StubRequest(path = "/foo"),
+        StubResponse(status = OK),
+        script = "exchange.response.status = 500; exchange.delay = 666; exchange.response.body = exchange.request.path"))
+
+    val result = service.findMatch(StubRequest(path = "/foo"))
+
+    assert(result.matchFound)
+    assert(result.delay.get === 666)
+    assert(result.response.get.status === SERVER_ERROR)
+    assert(result.response.get.body === "/foo")
+  }
+
+  test("duplicate pattern removed") {
+    val service = new StubService
+
+    service.addResponse(
+      StubExchange(
+        StubRequest(path = "/foo"),
+        StubResponse(status = OK)))
+
+    service.addResponse(
+      StubExchange(
+        StubRequest(path = "/foo"),
+        StubResponse(status = CREATED)))
+
+    assert(service.responses.size === 1)
+    assert(service.responses(0).exchange.response.status === CREATED) // ensure last stubbed request is kept
+
+  }
+
+  test("request filter empty") {
+    val service = defaultService
+    service.findMatch(StubRequest(path = "/test"))
+
+    val filter = new StubRequest() // empty filter
+    assert(service.findRequests(filter).size === 1)
+  }
+
+  test("request filter") {
+    val service = defaultService
+    service.findMatch(StubRequest(path = "/test"))
+    service.findMatch(StubRequest(path = "/test", params = List(StubParam("foo", "bar"))))
+
+    assert(service.requests.size === 2)
+
+    val filter = new StubRequest(params = List(StubParam("foo", "b.r")))
+    assert(service.findRequests(filter).size === 1) // should only match one of the requests
+  }
+
+  test("request filter with wait, not found") {
+    val service = defaultService
+    service.findMatch(StubRequest(path = "/test"))
+
+    val filter = new StubRequest(path = "/not/found")
+    assert(service.findRequests(filter).size === 0)
+  }
+
+  test("requets filter with wait") {
+    val service = defaultService
+    service.findMatch(StubRequest(path = "/test1"))
+
+    new Thread(new Runnable {
+      def run() {
+        try {
+          Thread.sleep(1000) // attempt to make 'findMatch' execute after parent thread starts waiting
+          service.findMatch(StubRequest(path = "/test2"))
+        } catch {
+          case e: Exception => e.printStackTrace()
+        }
+      }
+    }).start()
+
+    val filter = StubRequest(path = "/test2") // wait for second request
+    val result = service.findRequests(filter, 5000)
+
+    assert(result.size === 1)
+    assert(result.head.path === "/test2")
+  }
+
 }
