@@ -43,7 +43,7 @@ case class RequestPattern(
 
     def matchMethod: Option[MatchField] = {
       val methodField = new PartialMatchField(FieldType.METHOD, "method", method)
-      if (method != null) {
+      if (method != null && message.method != null) { // not really valid unless incoming message has method, but just to be safe
         if (method.findFirstIn(message.method).nonEmpty) {
           Some(methodField.asMatch(message.method))
         } else {
@@ -56,10 +56,14 @@ case class RequestPattern(
 
     def matchPath: Option[MatchField] = {
       val pathField = new PartialMatchField(FieldType.PATH, "path", path)
-      if (path.findFirstIn(message.path).nonEmpty) {
-        Some(pathField.asMatch(message.path))
+      if (path != null) {
+          if (path.findFirstIn(message.path).nonEmpty) { 
+            Some(pathField.asMatch(message.path))
+          } else {
+            Some(pathField.asMatchFailure(message.path))
+          }
       } else {
-        Some(pathField.asMatchFailure(message.path))
+          None
       }
     }
 

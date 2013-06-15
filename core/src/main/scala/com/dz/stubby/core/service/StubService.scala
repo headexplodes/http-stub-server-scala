@@ -51,6 +51,7 @@ class StubService {
     }
   }
 
+  @throws[NotFoundException]("if index does not exist")
   def getResponse(index: Int): StubServiceExchange = this.synchronized {
     try {
       return responses(index)
@@ -70,11 +71,12 @@ class StubService {
     }
   }
 
-  def deleteResponses = this.synchronized {
+  def deleteResponses() = this.synchronized {
     //LOGGER.trace("Deleting all responses")
     responses.clear
   }
 
+  @throws[NotFoundException]("if index does not exist")
   def getRequest(index: Int): StubRequest = this.synchronized {
     try {
       requests(index)
@@ -109,6 +111,7 @@ class StubService {
     requests.filter(r => pattern.matches(r).matches)
   }
 
+  @throws[NotFoundException]("if index does not exist")
   def deleteRequest(index: Int) = this.synchronized {
     //LOGGER.trace("Deleting request: " + index)
     try {
@@ -119,7 +122,7 @@ class StubService {
     }
   }
 
-  def deleteRequests = this.synchronized {
+  def deleteRequests() = this.synchronized {
     //LOGGER.trace("Deleting all requests")
     requests.clear
   }

@@ -47,10 +47,10 @@ class StubServiceTest extends FunSuite {
 
   test("no match") {
     val service = defaultService
-    service.findMatch(StubRequest(path = "/not/found"))
+    val result = service.findMatch(StubRequest(path = "/not/found"))
 
     assert(service.responses.nonEmpty)
-    assert(!service.findMatch(defaultRequest).matchFound)
+    assert(!result.matchFound)
   }
 
   test("delete responses") {
