@@ -33,7 +33,7 @@ object DeepCopyUtils { // hacks to convert between mutable and immutable types (
   }
   
   def toScalaSeq(src: JavaList): AnySeq =
-    List(collectionAsScalaIterable(src).map(x => toScala(x)))
+    collectionAsScalaIterable(src).map(x => toScala(x)).toList
   
   def toScalaMap(src: JavaMap): AnyMap =
     mapAsScalaMap(src).toMap.map { case (k, v) => (toScala(k), toScala(v)) }
