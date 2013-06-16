@@ -6,7 +6,7 @@ import java.io.ByteArrayInputStream
 
 case class TestBean(foo: String)
 
-class JsonUtilsTest extends FunSuite { 
+class JsonUtilsTest extends FunSuite {
 
   val testBean = TestBean("bar")
   val testJson = """{"foo":"bar"}"""
@@ -42,6 +42,39 @@ class JsonUtilsTest extends FunSuite {
     expectResult("bar") {
       JsonUtils.deserialize[TestBean](stream).foo
     }
+  }
+
+  val primativesStr = """{
+        "integer": 1234,
+        "decimal": 1.234,
+        "string": "foo",
+        "boolean": true,
+        "empty": null
+      }"""
+
+  def primatives = JsonUtils.deserializeObject(primativesStr)
+    .asInstanceOf[scala.collection.mutable.Map[String, _]]
+
+  test("deserialize integer value") {
+    assert(primatives("integer") === 1234)
+  }
+
+  test("deserialize string value") {
+    assert(primatives("string") === "foo")
+  }
+
+  test("deserialize boolean value") {
+    assert(primatives("boolean") === true)
+  }
+
+  test("deserialize null value") {
+    assert(primatives("empty") === null)
+  }
+
+  test("deserialize decimal value") {
+    val map = primatives
+    assert(map("decimal").isInstanceOf[java.math.BigDecimal])
+    assert(map("decimal") === java.math.BigDecimal.valueOf(1.234))
   }
 
 }
