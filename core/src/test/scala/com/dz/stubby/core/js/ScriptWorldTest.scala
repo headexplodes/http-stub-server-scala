@@ -25,7 +25,7 @@ class ScriptWorldTest extends FunSuite {
       world.setDelay(4321)
       world.getResponse.setStatus(500)
       world.getResponse.setBody("<body/>")
-      world.getResponse.getHeaders.add(StubParam("X-Foo", "bar"))
+      world.getResponse.addHeader("X-Foo", "bar")
       
       val (result, delay) = world.result
       

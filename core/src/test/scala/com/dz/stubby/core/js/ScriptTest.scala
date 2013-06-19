@@ -6,6 +6,8 @@ import com.dz.stubby.core.model.StubResponse
 import com.dz.stubby.core.model.StubExchange
 import com.dz.stubby.core.model.StubParam
 import java.util.ArrayList
+import java.util.HashMap
+import java.util.Arrays
 
 class ScriptTest extends FunSuite {
 
@@ -21,17 +23,17 @@ class ScriptTest extends FunSuite {
     headers = List(StubParam("Content-Type", "application/json")),
     body = "response body")
 
-  class TestBean {
-    private val items = new ArrayList[String]
-    def getItems: ArrayList[String] = items
-  }
-
   implicit def createWorld: ScriptWorld = new ScriptWorld(request, response, Some(1234L))
 
   def createWorldWithJsonBodies: ScriptWorld = {
-    val bodyBean = new TestBean
-    bodyBean.getItems.add("one")
-    bodyBean.getItems.add("two")
+    val bodyBean = new HashMap[String, Object]() { // JavaScript model must be in Java objects
+      put("items",
+        new ArrayList[String]() {
+          add("one")
+          add("two")
+        }
+      )
+    }
 
     val jsonRequest = request.copy(body = bodyBean)
     val jsonResponse = response.copy(body = bodyBean)
@@ -100,23 +102,41 @@ class ScriptTest extends FunSuite {
   test("get request JSON body") {
     val world = createWorldWithJsonBodies
 
-    assert(executeScript("exchange.request.body.items.get(0)")(world) === "one")
-    assert(executeScript("exchange.request.body.items.get(1)")(world) === "two")
+    assert(executeScript("exchange.request.body.get('items').get(0)")(world) === "one")
+    assert(executeScript("exchange.request.body.get('items').get(1)")(world) === "two")
   }
 
   ignore("set request JSON body (ensure not possible)") {
+    val world = createWorldWithJsonBodies
+
     // TODO: How to support JavaScript mutating parsed JSON response
+
   }
 
   test("get response JSON body") {
     val world = createWorldWithJsonBodies
 
-    assert(executeScript("exchange.response.body.items.get(0)")(world) === "one")
-    assert(executeScript("exchange.response.body.items.get(1)")(world) === "two")
+    assert(executeScript("exchange.response.body.get('items').get(0)")(world) === "one")
+    assert(executeScript("exchange.response.body.get('items').get(1)")(world) === "two")
   }
 
-  ignore("set respones JSON body (ensure original not modified)") {
-    // TODO: How to support JavaScript mutating parsed JSON response
+  //  type AnyJMap = java.util.Map[String, _]
+  //  type AnyJList = java.util.List[_]
+
+  type AnyMap = Map[String, _]
+  type AnySeq = Seq[_]
+
+  test("set respones JSON body (ensure original not modified)") {
+    val world = createWorldWithJsonBodies
+
+    executeScript("exchange.response.body.get('items').add('three')")(world)
+
+    val (result, _) = world.result
+
+    val body = result.body.asInstanceOf[AnyMap]("items").asInstanceOf[AnySeq]
+
+    assert(body === List("one", "two", "three"))
+    assert(result.body === Map("items" -> List("one", "two"))) // ensure original not modified
   }
 
 }

@@ -100,7 +100,7 @@ class DeepCopyUtilsTest extends FunSuite {
   test("copy object graph") {
     val value = Map(
       "foo" -> Map("one" -> 1234),
-      "bar" -> List("a", "b", Map("is" -> true)))
+      "bar" -> List("a", "b", Map("is" -> true)))   
 
     val asJava = toJava(value)
     val asJavaMap = asJava.asInstanceOf[AnyJMap]
