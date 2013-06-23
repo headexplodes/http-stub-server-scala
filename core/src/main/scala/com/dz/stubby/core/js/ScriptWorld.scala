@@ -36,6 +36,7 @@ case class ScriptResponse(
   def this(response: StubResponse) =
     this(response.status,
       DeepCopyUtils.toJava(response.body), // deep-copy body in to Java classes for JavaScript
+      //response.body,
       response.headers.toBuffer)
 
   def getStatus: Int = status
@@ -74,7 +75,7 @@ class ScriptWorld(
     private val response: ScriptResponse,
     private var delay: Option[Long] = None) {
 
-  def this(request: StubRequest, response: StubResponse, delay: Option[Long]) = this( 
+  def this(request: StubRequest, response: StubResponse, delay: Option[Long]) = this(
     new ScriptRequest(request),
     new ScriptResponse(response),
     delay)
