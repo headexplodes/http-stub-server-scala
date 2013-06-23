@@ -1,8 +1,4 @@
-package com.dz.stubby
-
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+package com.dz.stubby.standalone
 
 import unfiltered.netty.ServerErrorResponse
 import unfiltered.netty.cycle
@@ -13,6 +9,7 @@ import unfiltered.request.Path
 import unfiltered.request.Seg
 import unfiltered.response.Pass
 import unfiltered.response.ResponseString
+import unfiltered.netty.Http
 
 class Server {
 
@@ -59,18 +56,6 @@ class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with Serv
 
 object Main {
   def main(args: Array[String]) {
-
-    //unfiltered.netty.Http(8080).plan(new AppPlan(new Server)).run()
-
-    val mapper = new ObjectMapper with ScalaObjectMapper
-
-    val jsonContent = """{"test":"113123","myList":{"test2":"321323"}}"""
-
-    mapper.registerModule(DefaultScalaModule)
-    
-    val mapData = mapper.readValue(jsonContent, classOf[Map[String,String]])
-
-    System.out.println(mapData.toString)
-    
+    Http(8080).plan(new AppPlan(new Server)).run()
   }
 }

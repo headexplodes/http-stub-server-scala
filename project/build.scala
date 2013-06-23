@@ -18,9 +18,13 @@ object RootBuild extends Build {
 
   lazy val coreSettings = (
     buildSettings
+    ++ Seq(libraryDependencies ++= Dependencies.jackson ++ Dependencies.runtime ++ Dependencies.test))
+  
+  lazy val standaloneSettings = (
+    buildSettings
     ++ Seq(libraryDependencies ++= Dependencies.all)
     ++ Seq(mainClass := Some("com.dz.stubby.Main")))
-  
+    
   lazy val root = Project(
     id = "root",
     base = file("."),
@@ -34,7 +38,7 @@ object RootBuild extends Build {
   lazy val standalone = Project(
     id = "standalone",
     base = file("standalone"),
-    settings = buildSettings)
+    settings = standaloneSettings) dependsOn (core)
 
   lazy val functionalTest = Project(
     id = "functionalTest",
@@ -49,15 +53,18 @@ object Dependencies {
     "net.databinder" %% "unfiltered" % "0.6.8" withSources (),
     "net.databinder" %% "unfiltered-filter" % "0.6.8" withSources (),
     "net.databinder" %% "unfiltered-netty" % "0.6.8" withSources (),
-    "net.databinder" %% "unfiltered-netty-server" % "0.6.8" withSources (),
-    
+    "net.databinder" %% "unfiltered-netty-server" % "0.6.8" withSources ()
+  )
+  
+  val jackson = Seq(
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.2.1" withSources(),
     "com.fasterxml.jackson.core" % "jackson-core" % "2.2.1" withSources(),
-    "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.1" withSources()
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.1" withSources()    
   )
 
   lazy val runtime = Seq(
-    "org.apache.commons" % "commons-lang3" % "3.1"
+    "org.apache.commons" % "commons-lang3" % "3.1",
+    "org.apache.httpcomponents" % "httpclient" % "4.2.5" withSources()
   )
 
   lazy val test = Seq(
@@ -65,6 +72,6 @@ object Dependencies {
     "org.scalamock" %% "scalamock-scalatest-support" % "3.0.1" % "test" withSources()
   )
 
-  lazy val all = unfiltered ++ runtime ++ test
+  lazy val all = unfiltered ++ jackson ++ runtime ++ test
 
 }
