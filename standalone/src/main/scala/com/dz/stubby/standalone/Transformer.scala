@@ -1,18 +1,19 @@
 package com.dz.stubby.standalone
 
-import unfiltered.request.HttpRequest
-import unfiltered.netty.ReceivedMessage
-import com.dz.stubby.core.model.StubRequest
-import com.dz.stubby.core.model.StubParam
 import java.net.URI
-import org.apache.http.client.utils.URLEncodedUtils
 import scala.collection.JavaConversions
+import org.apache.http.client.utils.URLEncodedUtils
+import com.dz.stubby.core.model.StubParam
+import com.dz.stubby.core.model.StubRequest
+import unfiltered.netty.ReceivedMessage
+import unfiltered.request.HttpRequest
+import org.apache.commons.io.IOUtils
 
 object Transformer {
 
   import JavaConversions._
 
-  def toStubRequest(src: HttpRequest[ReceivedMessage]): StubRequest = {
+  def toStubRequest(src: HttpRequest[_]): StubRequest = {
     val uri = new URI(src.uri)
     StubRequest(
       uri.getPath,
@@ -22,17 +23,22 @@ object Transformer {
       convertBody(src)
     )
   }
-  
+
   def populateUnfilteredResponse = "TODO"
 
-  def parseQuery(uri: URI) =
+  private def parseQuery(uri: URI) =
     collectionAsScalaIterable(URLEncodedUtils.parse(uri, "UTF-8")).toList
 
-  def convertBody(src: HttpRequest[_]) = {
-    "TODO"
+  private def convertBody(src: HttpRequest[_]) = {
+    val stream = src.inputStream
+    if (stream != null) {
+      IOUtils.toString(stream)
+    } else {
+      null // no body
+    }
   }
 
-  def toStubHeaders(src: HttpRequest[_]): Iterator[StubParam] = {
+  private def toStubHeaders(src: HttpRequest[_]): Iterator[StubParam] = {
     for (
       name <- src.headerNames;
       value <- src.headers(name)

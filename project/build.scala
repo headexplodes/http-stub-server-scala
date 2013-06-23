@@ -64,6 +64,7 @@ object Dependencies {
 
   lazy val runtime = Seq(
     "org.apache.commons" % "commons-lang3" % "3.1",
+    "org.apache.commons" % "commons-io" % "1.3.2",
     "org.apache.httpcomponents" % "httpclient" % "4.2.5" withSources()
   )
 
