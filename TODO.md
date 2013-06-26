@@ -10,6 +10,9 @@
  * Tool for bulk-loading messages
  * Example Ruby/Scala/other? client code for interacting with stub.
    ** Convert Ruby example in to a GEM?
+ * Persistence
+   > Async
+   > Persist on shutdown
  
 Github TODO:
  - Add Ruby client code

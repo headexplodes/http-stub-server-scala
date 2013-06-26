@@ -1,7 +1,12 @@
 package com.dz.stubby.standalone
 
+import java.io.OutputStreamWriter
+
+import com.dz.stubby.core.model.StubResponse
 import com.dz.stubby.core.service.JsonServiceInterface
 import com.dz.stubby.core.service.StubService
+import com.dz.stubby.core.service.model.StubServiceResult
+
 import unfiltered.netty.Http
 import unfiltered.netty.ServerErrorResponse
 import unfiltered.netty.cycle
@@ -12,16 +17,31 @@ import unfiltered.request.POST
 import unfiltered.request.Path
 import unfiltered.request.Seg
 import unfiltered.response.ComposeResponse
-import unfiltered.response.Pass
-import unfiltered.response.ResponseString
+import unfiltered.response.HttpResponse
 import unfiltered.response.JsonContent
+import unfiltered.response.NotFound
 import unfiltered.response.Ok
+import unfiltered.response.Responder
+import unfiltered.response.ResponseString
+import unfiltered.response.ResponseWriter
 
 case class JsonResponse(json: String)
   extends ComposeResponse(JsonContent ~> ResponseString(json))
 
-case class EmptyOk(any: Unit)
+case class EmptyOk(any: Any)
   extends ComposeResponse(Ok)
+
+case class StubUnfilteredResponse(result: StubResponse) extends Responder[Any] {
+  def respond(res: HttpResponse[Any]) {
+    val writer = new OutputStreamWriter(res.outputStream, res.charset)
+    try {
+      res.status(result.status)
+      // TODO
+    } finally {
+      writer.close()
+    }
+  }
+}
 
 class Server {
   import Transformer._
@@ -54,7 +74,12 @@ class Server {
 
   def matchRequest(req: HttpRequest[_]) = {
     val result = service.findMatch(toStubRequest(req))
-    // TODO: create stub response extending ResponseWriter (see ResponseString)
+    if (result.matchFound) {
+      result.delay.foreach(t => Thread.sleep(t)) // sleep if delay given
+      StubUnfilteredResponse(result.response.get)
+    } else {
+      NotFound ~> ResponseString("No stubbed response found")
+    }
   }
 }
 
