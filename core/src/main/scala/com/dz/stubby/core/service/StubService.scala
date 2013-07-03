@@ -30,15 +30,15 @@ class StubService {
         if (matchResult.matches) {
           //LOGGER.info("Matched: " + request.getPath() + "")
           val exchange = response.exchange
-          if (exchange.script != null) {
-            val world = new ScriptWorld(request, exchange.response, Some(exchange.delay)) // creates deep copies of objects
-            new Script(exchange.script).execute(world)
+          if (exchange.script.getOrElse(null) != null) { // TODO: could be better...
+            val world = new ScriptWorld(request, exchange.response, exchange.delay) // creates deep copies of objects
+            new Script(exchange.script.get).execute(world)
             val (scriptResponse, scriptDelay) = world.result
             return new StubServiceResult(
               attempts.toList, Some(scriptResponse), scriptDelay)
           } else {
             return new StubServiceResult(
-              attempts.toList, Some(exchange.response), Some(exchange.delay))
+              attempts.toList, Some(exchange.response), exchange.delay)
           }
         }
       }

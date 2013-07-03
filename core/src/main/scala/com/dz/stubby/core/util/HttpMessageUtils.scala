@@ -42,25 +42,25 @@ object HttpMessageUtils {
     result.toString()
   }
 
-  def isText(m: StubMessage): Boolean =
+  def isText(m: StubMessage[_]): Boolean =
     m.getHeader(ContentTypeHeader) match {
       case Some(value) => TextContentType.matcher(value).matches
       case _ => false
     }
 
-  def isJson(m: StubMessage): Boolean =
+  def isJson(m: StubMessage[_]): Boolean =
     m.getHeader(ContentTypeHeader) match {
       case Some(value) => JsonContentType.matcher(value).matches
       case _ => false
     }
 
-  def bodyAsText(m: StubMessage): String =
+  def bodyAsText(m: StubMessage[_]): String =
     m.body match {
       case s: String => s
       case _ => throw new RuntimeException("Unexpected body type: " + m.body.getClass)
     }
 
-  def bodyAsJson(m: StubMessage): Any =
+  def bodyAsJson(m: StubMessage[_]): Any =
     m.body match {
       case s: String => JsonUtils.defaultMapper.readValue(s, classOf[Object]) // support object or array as top-level
       case s: Seq[_] => s // assume already parsed

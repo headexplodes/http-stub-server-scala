@@ -1,12 +1,10 @@
 package com.dz.stubby.standalone
 
 import java.io.OutputStreamWriter
-
 import com.dz.stubby.core.model.StubResponse
 import com.dz.stubby.core.service.JsonServiceInterface
 import com.dz.stubby.core.service.StubService
 import com.dz.stubby.core.service.model.StubServiceResult
-
 import unfiltered.netty.Http
 import unfiltered.netty.ServerErrorResponse
 import unfiltered.netty.cycle
@@ -24,6 +22,8 @@ import unfiltered.response.Ok
 import unfiltered.response.Responder
 import unfiltered.response.ResponseString
 import unfiltered.response.ResponseWriter
+import com.dz.stubby.core.util.JsonUtils
+import org.apache.commons.io.IOUtils
 
 case class JsonResponse(json: String)
   extends ComposeResponse(JsonContent ~> ResponseString(json))
@@ -33,12 +33,21 @@ case class EmptyOk(any: Any)
 
 case class StubUnfilteredResponse(result: StubResponse) extends Responder[Any] {
   def respond(res: HttpResponse[Any]) {
-    val writer = new OutputStreamWriter(res.outputStream, res.charset)
+    val out = res.outputStream
     try {
       res.status(result.status)
-      // TODO
+      result.headers.foreach {
+        h => res.header(h.name, h.value)
+      }
+      if (result.body != null) {
+          if (result.body.isInstanceOf[String]) {
+            IOUtils.write(result.body.toString, out)
+          } else {
+            JsonUtils.serialize(out, result.body) // assume deserialised JSON (ie, a Map or List)         
+          }
+      }
     } finally {
-      writer.close()
+      out.close()
     }
   }
 }
@@ -90,22 +99,18 @@ class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with Serv
       case DELETE(_) => server.deleteResponses
       case POST(_) => server.addResponse(req)
     }
-
     case req @ Path(Seg("_control" :: "responses" :: id :: Nil)) => req match {
       case GET(_) => server.getResponse(id.toInt)
       case DELETE(_) => server.deleteResponse(id.toInt)
     }
-
     case req @ Path(Seg("_control" :: "requests" :: Nil)) => req match {
       case GET(_) => server.getRequests
       case DELETE(_) => server.deleteRequests
     }
-
     case req @ Path(Seg("_control" :: "requests" :: id :: Nil)) => req match {
       case GET(_) => server.getRequest(id.toInt)
       case DELETE(_) => server.deleteRequest(id.toInt)
     }
-
     case req @ _ => {
       server.matchRequest(req)
     }
@@ -114,6 +119,10 @@ class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with Serv
 
 object Main {
   def main(args: Array[String]) {
-    Http(8080).plan(new AppPlan(new Server)).run()
+    if (args.length > 0) {
+      Http(args(0).toInt).plan(new AppPlan(new Server)).run()
+    } else {
+        throw new RuntimeException("Usage: java ... <port>")
+    }
   }
 }

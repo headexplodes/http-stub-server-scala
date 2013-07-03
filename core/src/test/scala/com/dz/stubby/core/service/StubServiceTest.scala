@@ -92,7 +92,7 @@ class StubServiceTest extends FunSuite {
       StubExchange(
         StubRequest(path = "/foo"),
         StubResponse(status = OK),
-        delay = 1234))
+        delay = Some(1234)))
 
     val result = service.findMatch(StubRequest(path = "/foo"))
 
@@ -106,7 +106,7 @@ class StubServiceTest extends FunSuite {
       StubExchange(
         StubRequest(path = "/foo"),
         StubResponse(status = OK),
-        script = "exchange.response.status = 500; exchange.delay = 666; exchange.response.body = exchange.request.path"))
+        script = Some("exchange.response.status = 500; exchange.delay = 666; exchange.response.body = exchange.request.path")))
 
     val result = service.findMatch(StubRequest(path = "/foo"))
 

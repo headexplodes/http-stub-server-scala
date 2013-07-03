@@ -57,9 +57,9 @@ object Dependencies {
   )
   
   val jackson = Seq(
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.2.1" withSources(),
-    "com.fasterxml.jackson.core" % "jackson-core" % "2.2.1" withSources(),
-    "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.1" withSources()    
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.2.2" withSources(),
+    "com.fasterxml.jackson.core" % "jackson-core" % "2.2.2" withSources(),
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.2" withSources()    
   )
 
   lazy val runtime = Seq(

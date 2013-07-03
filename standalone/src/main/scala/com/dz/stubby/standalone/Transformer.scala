@@ -16,15 +16,13 @@ object Transformer {
   def toStubRequest(src: HttpRequest[_]): StubRequest = {
     val uri = new URI(src.uri)
     StubRequest(
-      uri.getPath,
       src.method.toUpperCase, // method should always be upper-case
+      uri.getPath,
       parseQuery(uri).map(p => StubParam(p.getName, p.getValue)),
       toStubHeaders(src).toList,
       convertBody(src)
     )
   }
-
-  def populateUnfilteredResponse = "TODO"
 
   private def parseQuery(uri: URI) =
     collectionAsScalaIterable(URLEncodedUtils.parse(uri, "UTF-8")).toList
