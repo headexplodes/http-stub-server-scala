@@ -5,8 +5,11 @@ import com.dz.stubby.core.util.JsonUtils
 import com.dz.stubby.core.model.StubMessage
 import com.dz.stubby.core.model.StubRequest
 import com.dz.stubby.core.model.StubParam
+import com.dz.stubby.core.util.OptionUtils
 
 class JsonBodyPatternTest extends FunSuite {
+
+  import OptionUtils._
 
   def parse(json: String) = JsonUtils.deserializeObject(json)
 

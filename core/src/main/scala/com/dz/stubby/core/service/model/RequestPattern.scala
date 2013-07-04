@@ -7,30 +7,29 @@ import scala.annotation.meta.field
 import com.dz.stubby.core.model.StubMessage
 
 object RequestPattern {
-  //val DefaultPattern: TextPattern = new TextPattern(".*")
-
-  def toPattern(value: String): TextPattern = {
-    if (value != null) new TextPattern(value) else null
+  def toPattern(value: Option[String]): Option[TextPattern] = {
+    value.map(s => new TextPattern(s))
   }
 
   def toPattern(params: List[StubParam]): Set[ParamPattern] = {
     params.map(p => new ParamPattern(p.name, p.value)).toSet
   }
 
-  def toBodyPattern(obj: AnyRef): BodyPattern = obj match {
-    case null => null
-    case str: String => new TextBodyPattern(str)
-    case coll @ (_: Map[_, _] | _: List[_]) => new JsonBodyPattern(coll)
-    case _ => throw new RuntimeException("Unexpected body type: " + obj.getClass)
+  def toBodyPattern(obj: Option[AnyRef]): Option[BodyPattern] = obj.map {
+    _ match {
+      case str: String => new TextBodyPattern(str)
+      case coll @ (_: Map[_, _] | _: List[_]) => new JsonBodyPattern(coll)
+      case _ => throw new RuntimeException("Unexpected body type: " + obj.getClass)
+    }
   }
 }
 
 case class RequestPattern(
-    val method: TextPattern,
-    val path: TextPattern,
+    val method: Option[TextPattern],
+    val path: Option[TextPattern],
     val params: Set[ParamPattern], // TODO: ensure not serialized when empty
     val headers: Set[ParamPattern],
-    val body: BodyPattern) {
+    val body: Option[BodyPattern]) {
 
   def this(request: StubRequest) = this(
     RequestPattern.toPattern(request.method),
@@ -42,41 +41,42 @@ case class RequestPattern(
   def matches(message: StubRequest): MatchResult = {
 
     def matchMethod: Option[MatchField] = {
-      val methodField = new PartialMatchField(FieldType.METHOD, "method", method)
-      if (method != null && message.method != null) { // not really valid unless incoming message has method, but just to be safe
-        if (method.findFirstIn(message.method).nonEmpty) {
-          Some(methodField.asMatch(message.method))
-        } else {
-          Some(methodField.asMatchFailure(message.method))
+      method.map { ptn =>
+        val methodField = new PartialMatchField(FieldType.METHOD, "method", method.get)
+        message.method match {
+          case None => methodField.asNotFound
+          case Some(m) => {
+            ptn.findFirstIn(m) match {
+              case Some(_) => methodField.asMatch(m)
+              case None => methodField.asMatchFailure(m)
+            }
+          }
         }
-      } else {
-        None
       }
     }
 
     def matchPath: Option[MatchField] = {
-      val pathField = new PartialMatchField(FieldType.PATH, "path", path)
-      if (path != null) {
-          if (path.findFirstIn(message.path).nonEmpty) { 
-            Some(pathField.asMatch(message.path))
-          } else {
-            Some(pathField.asMatchFailure(message.path))
+      path.map { ptn =>
+        val pathField = new PartialMatchField(FieldType.PATH, "path", path.get)
+        message.path match {
+          case None => pathField.asNotFound
+          case Some(m) => {
+            ptn.findFirstIn(m) match {
+              case Some(_) => pathField.asMatch(m)
+              case None => pathField.asMatchFailure(m)
+            }
           }
-      } else {
-          None
+        }
       }
     }
 
     def matchBody: Option[MatchField] = {
-      val bodyField = new PartialMatchField(FieldType.BODY, "body", "<pattern>")
-      if (body != null) {
-        if (message.body != null) {
-          Some(body.matches(message))
-        } else {
-          Some(bodyField.asNotFound)
+      body.map { ptn =>
+        val bodyField = new PartialMatchField(FieldType.BODY, "body", "<pattern>")
+        message.body match {
+          case None => bodyField.asNotFound
+          case Some(m) => ptn.matches(message)
         }
-      } else {
-        None
       }
     }
 

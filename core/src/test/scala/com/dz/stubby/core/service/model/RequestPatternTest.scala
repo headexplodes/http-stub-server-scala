@@ -5,8 +5,11 @@ import com.dz.stubby.core.model.StubRequest
 import com.dz.stubby.core.model.StubParam
 import com.dz.stubby.core.service.model.FieldType._
 import org.scalatest.matchers.ShouldMatchers
+import com.dz.stubby.core.util.OptionUtils
 
 class RequestPatternTest extends FunSuite with ShouldMatchers {
+
+  import OptionUtils._
 
   val stubbedRequest = new StubRequest(
     method = "PO.*",
@@ -54,8 +57,8 @@ class RequestPatternTest extends FunSuite with ShouldMatchers {
   test("construct from pattern") {
     val pattern = new RequestPattern(stubbedRequest)
 
-    assert(pattern.method === "PO.*")
-    assert(pattern.path === "/request/.*")
+    assert(pattern.method.get === "PO.*")
+    assert(pattern.path.get === "/request/.*")
 
     assert(pattern.params.size === 1)
     assert(pattern.params.head.name === "foo")
@@ -65,15 +68,15 @@ class RequestPatternTest extends FunSuite with ShouldMatchers {
     assert(pattern.headers.head.name === "Content-Type")
     assert(pattern.headers.head.pattern === "text/plain; .+")
 
-    assert(pattern.body === new TextBodyPattern("body .*"))
+    assert(pattern.body.get === new TextBodyPattern("body .*"))
   }
 
   test("construct from empty pattern") {
     val pattern = new RequestPattern(new StubRequest())
 
-    assert(pattern.method === null)
-    assert(pattern.path === null)
-    assert(pattern.body === null)
+    assert(pattern.method.isEmpty)
+    assert(pattern.path.isEmpty)
+    assert(pattern.body.isEmpty)
     assert(pattern.params.isEmpty)
     assert(pattern.headers.isEmpty)
   }
@@ -83,7 +86,7 @@ class RequestPatternTest extends FunSuite with ShouldMatchers {
     val request = new StubRequest(body = body)
     val pattern = new RequestPattern(request)
 
-    assert(pattern.body === new JsonBodyPattern(body))
+    assert(pattern.body.get === new JsonBodyPattern(body))
   }
 
   test("JSON body pattern list") {
@@ -91,7 +94,7 @@ class RequestPatternTest extends FunSuite with ShouldMatchers {
     val request = new StubRequest(body = body)
     val pattern = new RequestPattern(request)
 
-    assert(pattern.body === new JsonBodyPattern(body))
+    assert(pattern.body.get === new JsonBodyPattern(body))
   }
 
   test("successful match") {
@@ -159,7 +162,7 @@ class RequestPatternTest extends FunSuite with ShouldMatchers {
   }
 
   test("doesn't match body when empty") {
-    val incoming = incomingRequest.copy(body = null)
+    val incoming = incomingRequest.copy(body = None)
     val result = new RequestPattern(stubbedRequest).matches(incoming)
 
     assertNotFound(BODY, "body", "<pattern>")(result)

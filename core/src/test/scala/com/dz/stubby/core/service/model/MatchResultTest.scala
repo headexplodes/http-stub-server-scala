@@ -10,9 +10,9 @@ import scala.collection.immutable.Seq
 
 class MatchResultTest extends FunSuite with BeforeAndAfter {
 
-  val notFoundField = new MatchField(HEADER, "name", "expected", NOT_FOUND, "actual", "message")
-  val matchFailureField = new MatchField(HEADER, "name", "expected", MATCH_FAILURE, "actual", "message")
-  val matchField = new MatchField(HEADER, "name", "expected", MATCH, "actual", "message")
+  val notFoundField = new MatchField(HEADER, "name", "expected", NOT_FOUND, Some("actual"), Some("message"))
+  val matchFailureField = new MatchField(HEADER, "name", "expected", MATCH_FAILURE, Some("actual"), Some("message"))
+  val matchField = new MatchField(HEADER, "name", "expected", MATCH, Some("actual"), Some("message"))
 
   before {
     assert(notFoundField.score === 0) // make sure scores are as expected

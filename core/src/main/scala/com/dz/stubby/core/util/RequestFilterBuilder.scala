@@ -18,9 +18,9 @@ object RequestFilterBuilder {
   private def addParam(filter: StubRequest, param: StubParam): StubRequest =
     param.name match {
       case MethodParam =>
-        filter.copy(method = param.value)
+        filter.copy(method = Some(param.value))
       case PathParam =>
-        filter.copy(path = param.value)
+        filter.copy(path = Some(param.value))
       case ParamPattern(paramName) =>
         filter.copy(params = filter.params :+ StubParam(paramName, param.value))
       case HeaderPattern(headerName) =>

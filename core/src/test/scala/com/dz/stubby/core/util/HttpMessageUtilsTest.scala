@@ -9,6 +9,7 @@ import com.dz.stubby.core.model.StubRequest
 
 class HttpMessageUtilsTest extends FunSuite with BeforeAndAfter {
 
+  import OptionUtils._
   import HttpMessageUtils._
 
   test("upper case header") {

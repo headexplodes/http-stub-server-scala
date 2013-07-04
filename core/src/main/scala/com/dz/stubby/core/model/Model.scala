@@ -1,7 +1,5 @@
 package com.dz.stubby.core.model
 
-// TODO: use options... but can Jackson handle them?
-
 case class StubParam(
   name: String,
   value: String)
@@ -25,15 +23,15 @@ trait StubHeaders[T <: StubHeaders[T]] {
 }
 
 trait StubMessage[T <: StubHeaders[T]] extends StubHeaders[T] {
-  val body: AnyRef
+  val body: Option[AnyRef]
 }
 
 case class StubRequest(
-    val method: String = null,
-    val path: String = null,
+    val method: Option[String] = None, // optional so we can create filters
+    val path: Option[String] = None,
     val params: List[StubParam] = Nil,
     val headers: List[StubParam] = Nil,
-    val body: AnyRef = null) extends StubMessage[StubRequest] {
+    val body: Option[AnyRef] = None) extends StubMessage[StubRequest] {
 
   def getParam(name: String): Option[String] =
     params.find(_.name.equalsIgnoreCase(name)).map(_.value)
@@ -45,9 +43,9 @@ case class StubRequest(
 }
 
 case class StubResponse(
-  val status: Int = 0,
+  val status: Int,
   val headers: List[StubParam] = Nil,
-  val body: AnyRef = null) extends StubMessage[StubResponse] {
+  val body: Option[AnyRef] = None) extends StubMessage[StubResponse] {
   
   override def withHeaders(headers: List[StubParam]): StubResponse = 
     copy(headers = headers)

@@ -5,8 +5,11 @@ import com.dz.stubby.core.model.StubRequest
 import com.dz.stubby.core.model.StubExchange
 import com.dz.stubby.core.model.StubResponse
 import com.dz.stubby.core.model.StubParam
+import com.dz.stubby.core.util.OptionUtils
 
 class StubServiceTest extends FunSuite {
+
+  import OptionUtils._
 
   val OK = 200
   val CREATED = 201
@@ -82,8 +85,8 @@ class StubServiceTest extends FunSuite {
     assert(service.findMatch(defaultRequest.copy(path = "/foo")).matchFound)
     assert(!service.findMatch(defaultRequest.copy(path = "/not/found")).matchFound) // ensure even failed matches recorded
 
-    assert(service.requests(0).path === "/not/found") // most recent first
-    assert(service.requests(1).path === "/foo")
+    assert(service.requests(0).path.get === "/not/found") // most recent first
+    assert(service.requests(1).path.get === "/foo")
   }
 
   test("delay") {
@@ -113,7 +116,7 @@ class StubServiceTest extends FunSuite {
     assert(result.matchFound)
     assert(result.delay.get === 666)
     assert(result.response.get.status === SERVER_ERROR)
-    assert(result.response.get.body === "/foo")
+    assert(result.response.get.body.get === "/foo")
   }
 
   test("duplicate pattern removed") {
@@ -180,7 +183,7 @@ class StubServiceTest extends FunSuite {
     val result = service.findRequests(filter, 5000)
 
     assert(result.size === 1)
-    assert(result.head.path === "/test2")
+    assert(result.head.path.get === "/test2")
   }
 
 }

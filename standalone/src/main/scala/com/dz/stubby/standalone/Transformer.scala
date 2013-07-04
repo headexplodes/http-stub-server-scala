@@ -8,9 +8,11 @@ import com.dz.stubby.core.model.StubRequest
 import unfiltered.netty.ReceivedMessage
 import unfiltered.request.HttpRequest
 import org.apache.commons.io.IOUtils
+import com.dz.stubby.core.util.OptionUtils
 
 object Transformer {
 
+  import OptionUtils._
   import JavaConversions._
 
   def toStubRequest(src: HttpRequest[_]): StubRequest = {

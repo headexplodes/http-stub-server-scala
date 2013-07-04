@@ -2,8 +2,11 @@ package com.dz.stubby.core.model
 
 import org.scalatest.FunSuite
 import com.dz.stubby.core.util.JsonUtils
+import com.dz.stubby.core.util.OptionUtils
 
 class ModelTest extends FunSuite {
+
+  import OptionUtils._
 
   val mapper = JsonUtils.createDefaultMapper
 

@@ -9,9 +9,11 @@ import java.util.ArrayList
 import java.util.HashMap
 import java.util.Arrays
 import com.dz.stubby.core.util.DeepCopyUtils
+import com.dz.stubby.core.util.OptionUtils
 
 class ScriptTest extends FunSuite {
 
+  import OptionUtils._
   import DeepCopyUtils._
 
   val request = new StubRequest(
@@ -88,7 +90,7 @@ class ScriptTest extends FunSuite {
     assert(world.result._1.getHeader("content-type") === None)
 
     executeScript("exchange.response.body = 'foo'")(world)
-    assert(world.result._1.body === "foo")
+    assert(world.result._1.body.get === "foo")
   }
 
   test("get request JSON body") {
@@ -115,12 +117,12 @@ class ScriptTest extends FunSuite {
     executeScript("exchange.response.body.get('items').add('three')")(world)
 
     val (result, _) = world.result
-    val resultBody = result.body.asInstanceOf[AnyMap]("items").asInstanceOf[AnySeq]
+    val resultBody = result.body.get.asInstanceOf[AnyMap]("items").asInstanceOf[AnySeq]
 
     assert(resultBody === List("one", "two", "three"))
 
-    assert(jsonRequest.body === Map("items" -> List("one", "two"))) // ensure original not modified
-    assert(jsonResponse.body === Map("items" -> List("one", "two")))
+    assert(jsonRequest.body.get === Map("items" -> List("one", "two"))) // ensure original not modified
+    assert(jsonResponse.body.get === Map("items" -> List("one", "two")))
   }
 
 }

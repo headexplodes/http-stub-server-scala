@@ -12,10 +12,10 @@ import scala.collection.mutable.Buffer
 class ScriptRequest(request: StubRequest) {
   import DeepCopyUtils._
 
-  def getMethod = request.method
-  def getPath = request.path
+  def getMethod = request.method.get
+  def getPath = request.path.get
 
-  def getBody = toJava(request.body)
+  def getBody = request.body.map(toJava).orNull
 
   def getHeaders = toJava(request.headers)
   def getHeaders(name: String) = toJava(request.getHeaders(name))
@@ -35,8 +35,7 @@ case class ScriptResponse(
 
   def this(response: StubResponse) =
     this(response.status,
-      DeepCopyUtils.toJava(response.body), // deep-copy body in to Java classes for JavaScript
-      //response.body,
+      response.body.map(DeepCopyUtils.toJava).orNull, // deep-copy body in to Java classes for JavaScript
       response.headers.toBuffer)
 
   def getStatus: Int = status
@@ -66,8 +65,11 @@ case class ScriptResponse(
     headers += StubParam(name, value)
   }
 
+  private def bodyToScala: Option[AnyRef] = 
+    if (body != null) Some(toScala(body)) else null
+  
   def toStubResponse: StubResponse =
-    new StubResponse(status, headers.toList, toScala(body)) // deep-copy body
+    new StubResponse(status, headers.toList, bodyToScala) // deep-copy body
 }
 
 class ScriptWorld(

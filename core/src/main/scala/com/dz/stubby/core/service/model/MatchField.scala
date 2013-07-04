@@ -18,11 +18,10 @@ case class PartialMatchField(
     val fieldName: String,
     val expectedValue: Any) { // expected value can be a Pattern, a JSON object etc.
 
-  def asMatch(actualValue: Any) = new MatchField(this, MATCH, actualValue, null)
-  def asNotFound = new MatchField(this, NOT_FOUND, null, null)
-  def asMatchFailure(actualValue: Any) = new MatchField(this, MATCH_FAILURE, actualValue, null)
-  def asMatchFailure(actualValue: Any, message: String) = new MatchField(this, MATCH_FAILURE, actualValue, message)
-
+  def asMatch(actualValue: Any) = new MatchField(this, MATCH, Some(actualValue))
+  def asNotFound = new MatchField(this, NOT_FOUND)
+  def asMatchFailure(actualValue: Any) = new MatchField(this, MATCH_FAILURE, Some(actualValue))
+  def asMatchFailure(actualValue: Any, message: String) = new MatchField(this, MATCH_FAILURE, None, Some(message))
 }
 
 case class MatchField(
@@ -30,14 +29,14 @@ case class MatchField(
     fieldName: String,
     expectedValue: Any,
     matchType: MatchType,
-    actualValue: Any, // could be string, JSON object etc.
-    message: String) {
+    actualValue: Option[Any], // could be string, JSON object etc.
+    message: Option[String]) {
 
   def this(
     partial: PartialMatchField,
     matchType: MatchType,
-    actualValue: Any,
-    message: String) =
+    actualValue: Option[Any] = None,
+    message: Option[String] = None) =
     this(
       partial.fieldType,
       partial.fieldName,
@@ -57,5 +56,5 @@ case class MatchField(
       case _ => 2
     }
   }
-
+  
 }

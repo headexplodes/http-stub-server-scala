@@ -5,8 +5,11 @@ import com.dz.stubby.core.model.StubRequest
 import com.dz.stubby.core.model.StubParam
 import scala.util.matching.Regex
 import org.scalatest.FunSuite
+import com.dz.stubby.core.util.OptionUtils
 
 class TextBodyPatternTest extends FunSuite with BeforeAndAfter {
+
+  import OptionUtils._
 
   implicit val defaultRequest =
     new StubRequest("METHOD", "path", Nil, List(new StubParam("Content-Type", "text/plain")), "foo")
@@ -30,9 +33,9 @@ class TextBodyPatternTest extends FunSuite with BeforeAndAfter {
   }
 
   test("invalid content type") {
-    implicit val request = 
+    implicit val request =
       defaultRequest.copy(headers = List(new StubParam("Content-Type", "application/json")))
-    
+
     assertRequestDoesNotMatch("foo")(request)
   }
 

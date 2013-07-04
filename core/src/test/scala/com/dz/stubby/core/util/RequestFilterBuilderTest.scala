@@ -11,12 +11,12 @@ class RequestFilterBuilderTest extends FunSuite {
 
   test("method") {
     val params = List(StubParam("method", "G.T"))
-    assert("G.T" === makeFilter(params).method)
+    assert("G.T" === makeFilter(params).method.get)
   }
 
   test("path") {
     val params = List(StubParam("path", "/foo/.*"))
-    assert("/foo/.*" === makeFilter(params).path)
+    assert("/foo/.*" === makeFilter(params).path.get)
   }
 
   test("params") {

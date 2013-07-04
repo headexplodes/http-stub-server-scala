@@ -39,12 +39,10 @@ case class StubUnfilteredResponse(result: StubResponse) extends Responder[Any] {
       result.headers.foreach {
         h => res.header(h.name, h.value)
       }
-      if (result.body != null) {
-          if (result.body.isInstanceOf[String]) {
-            IOUtils.write(result.body.toString, out)
-          } else {
-            JsonUtils.serialize(out, result.body) // assume deserialised JSON (ie, a Map or List)         
-          }
+      result.body match {
+        case Some(s: String) => IOUtils.write(result.body.toString, out)
+        case Some(s: AnyRef) => JsonUtils.serialize(out, result.body) // assume deserialised JSON (ie, a Map or List)         
+        case None => 
       }
     } finally {
       out.close()
@@ -122,7 +120,7 @@ object Main {
     if (args.length > 0) {
       Http(args(0).toInt).plan(new AppPlan(new Server)).run()
     } else {
-        throw new RuntimeException("Usage: java ... <port>")
+      throw new RuntimeException("Usage: java ... <port>")
     }
   }
 }

@@ -15,7 +15,7 @@ class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
     val expected = JsonUtils.prettyPrint(pattern)
     val actual = JsonUtils.prettyPrint(request.body)
     val result = matchResult(request)
-    val field = PartialMatchField(FieldType.BODY, "body", expected)
+    val field = PartialMatchField(FieldType.BODY, "body", Some(expected))
     if (result.matches) {
       field.asMatch(actual)
     } else {
