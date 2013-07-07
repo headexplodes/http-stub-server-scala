@@ -8,12 +8,12 @@ trait StubHeaders[T <: StubHeaders[T]] {
   val headers: List[StubParam]
 
   def withHeaders(headers: List[StubParam]): T
-  
+
   def getHeader(name: String): Option[String] =
     headers.find(_.name.equalsIgnoreCase(name)).map(_.value)
   def getHeaders(name: String): Seq[String] =
     headers.filter(_.name.equalsIgnoreCase(name)).map(_.value)
-        
+
   def addHeader(name: String, value: String): T =
     withHeaders(headers :+ StubParam(name, value))
   def removeHeader(name: String): T =
@@ -38,16 +38,16 @@ case class StubRequest(
   def getParams(name: String): Seq[String] =
     params.filter(_.name == name).map(_.value)
 
-  override def withHeaders(headers: List[StubParam]): StubRequest = 
+  override def withHeaders(headers: List[StubParam]): StubRequest =
     copy(headers = headers)
 }
 
 case class StubResponse(
-  val status: Int,
-  val headers: List[StubParam] = Nil,
-  val body: Option[AnyRef] = None) extends StubMessage[StubResponse] {
-  
-  override def withHeaders(headers: List[StubParam]): StubResponse = 
+    val status: Int,
+    val headers: List[StubParam] = Nil,
+    val body: Option[AnyRef] = None) extends StubMessage[StubResponse] {
+
+  override def withHeaders(headers: List[StubParam]): StubResponse =
     copy(headers = headers)
 }
 

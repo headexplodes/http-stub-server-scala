@@ -24,6 +24,7 @@ import unfiltered.response.ResponseString
 import unfiltered.response.ResponseWriter
 import com.dz.stubby.core.util.JsonUtils
 import org.apache.commons.io.IOUtils
+import unfiltered.netty.ReceivedMessage
 
 case class JsonResponse(json: String)
   extends ComposeResponse(JsonContent ~> ResponseString(json))
@@ -79,7 +80,7 @@ class Server {
   def addResponse(req: HttpRequest[_]) =
     EmptyOk(jsonService.addResponse(req.inputStream))
 
-  def matchRequest(req: HttpRequest[_]) = {
+  def matchRequest(req: HttpRequest[ReceivedMessage]) = {
     val result = service.findMatch(toStubRequest(req))
     if (result.matchFound) {
       result.delay.foreach(t => Thread.sleep(t)) // sleep if delay given

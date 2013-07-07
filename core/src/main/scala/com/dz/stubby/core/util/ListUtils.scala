@@ -22,10 +22,4 @@ object ListUtils {
   
   def compress[T](seq: Seq[T]): List[T] = compress(seq.toList)
 
-//  def toJavaList[T](list: Seq[T]): ArrayList[T] =
-//    new ArrayList(JavaConversions.seqAsJavaList(list))
-//
-//  def toScalaList[T](collection: Collection[T]): List[T] =
-//    JavaConversions.collectionAsScalaIterable(collection).toList
-
 }

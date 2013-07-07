@@ -18,6 +18,9 @@ class ModelTest extends FunSuite {
     "status" -> 200,
     "headers" -> List(testParamMap),
     "body" -> "<html>")
+    
+  val minimalResponse = StubResponse(200)
+  val minimalResponseMap = Map("status" -> 200)
 
   val testRequetsBody = Map("foo" -> "bar")
   val testRequest = StubRequest("GET", "/foo", List(testParam), List(testParam), testRequetsBody)
@@ -27,7 +30,7 @@ class ModelTest extends FunSuite {
     "headers" -> List(testParamMap),
     "params" -> List(testParamMap),
     "body" -> testRequetsBody)
-
+    
   val testExchange = StubExchange(testRequest, testResponse, Some(1234), Some("script()"))
   val testExchangeMap = Map(
     "request" -> testRequestMap,
@@ -50,9 +53,19 @@ class ModelTest extends FunSuite {
     assert(result === testResponseMap)
   }
 
+  test("serialize minimal response") {
+    val result = mapper.convertValue[Map[_, _]](minimalResponse)
+    assert(result == minimalResponseMap)
+  }
+
   test("deserialize response") {
     val result = mapper.convertValue[StubResponse](testResponseMap)
     assert(result === testResponse)
+  }
+  
+  test("deserialize minimal response") {
+    val result = mapper.convertValue[StubResponse](minimalResponseMap)
+    assert(result === minimalResponse)
   }
 
   test("serialize request") {
@@ -60,9 +73,19 @@ class ModelTest extends FunSuite {
     assert(result === testRequestMap)
   }
 
+  test("serialize empty request") {
+    val result = mapper.convertValue[Map[_, _]](StubRequest())
+    assert(result == Map())
+  }
+
   test("deserialize request") {
     val result = mapper.convertValue[StubRequest](testRequestMap)
     assert(result === testRequest)
+  }
+  
+  test("deserialize empty request") {
+    val result = mapper.convertValue[StubRequest](Map())
+    assert(result === StubRequest())
   }
 
   test("serialize exchange") {

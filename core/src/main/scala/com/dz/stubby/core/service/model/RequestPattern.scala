@@ -27,7 +27,7 @@ object RequestPattern {
 case class RequestPattern(
     val method: Option[TextPattern],
     val path: Option[TextPattern],
-    val params: Set[ParamPattern], // TODO: ensure not serialized when empty
+    val params: Set[ParamPattern],
     val headers: Set[ParamPattern],
     val body: Option[BodyPattern]) {
 
