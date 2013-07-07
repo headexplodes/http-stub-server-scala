@@ -19,18 +19,26 @@ import com.fasterxml.jackson.databind.`type`.TypeBindings
 import com.fasterxml.jackson.databind.`type`.SimpleType
 import java.lang.reflect.Type
 
+// TODO: Actually complete this and use it.
+//       The idea was to create a custom JSON array deserializer 
+//       that simply returned Nil for a null list, rather than null.
+//       Turns out that's quite a complex task in Jackson :S
+
 object CustomScalaModule extends JacksonModule {
   this += NilTypeModifier
   this += NilDeserializerResolver
 }
 
-private class NilDeserializer(elementType: JavaType, deser: JsonDeserializer[_])
+class NilDeserializer(elementType: JavaType, deser: JsonDeserializer[_])
     extends JsonDeserializer[List[AnyRef]] with ContextualDeserializer {
 
   override def createContextual(ctxt: DeserializationContext, property: BeanProperty): JsonDeserializer[_] = {
     val cd = ctxt.findContextualValueDeserializer(elementType, property)
-    if (cd != null) new NilDeserializer(elementType, cd)
-    else this
+    if (cd != null) {
+      new NilDeserializer(elementType, cd)
+    } else {
+      this
+    }
   }
 
   override def getNullValue = Nil
@@ -40,7 +48,7 @@ private class NilDeserializer(elementType: JavaType, deser: JsonDeserializer[_])
   }
 }
 
-private object NilDeserializerResolver extends Deserializers.Base {
+object NilDeserializerResolver extends Deserializers.Base {
 
   private val LIST = classOf[List[AnyRef]]
 
@@ -50,7 +58,7 @@ private object NilDeserializerResolver extends Deserializers.Base {
     beanDesc: BeanDescription,
     elementTypeDeserializer: TypeDeserializer,
     elementDeserializer: JsonDeserializer[_]) = {
-    
+
     if (!LIST.isAssignableFrom(theType.getRawClass)) {
       null
     } else {
@@ -59,32 +67,7 @@ private object NilDeserializerResolver extends Deserializers.Base {
   }
 }
 
-//trait NilDeserializerModule extends NilTypeModifierModule {
-//  this += NilDeserializerResolver
-//}
-
-private object NilTypeModifier extends CollectionLikeTypeModifier {
-  def BASE = classOf[List[Any]]
-}
-
-//trait NilTypeModifierModule extends JacksonModule {
-//  this += NilTypeModifier
-//}
-
-private trait CollectionLikeTypeModifier extends TypeModifier with GenTypeModifier {
-
-  def BASE: Class[_]
-
-  override def modifyType(originalType: JavaType, jdkType: Type, context: TypeBindings, typeFactory: TypeFactory) =
-    if (originalType.containedTypeCount() > 1) originalType else
-      classObjectFor(jdkType) find (BASE.isAssignableFrom(_)) map { cls =>
-        val eltType = if (originalType.containedTypeCount() == 1) originalType.containedType(0) else UNKNOWN
-        typeFactory.constructCollectionLikeType(cls, eltType)
-      } getOrElse originalType
-
-}
-
-private trait GenTypeModifier {
+object NilTypeModifier extends TypeModifier {
 
   // Workaround for http://jira.codehaus.org/browse/JACKSON-638
   protected def UNKNOWN = SimpleType.construct(classOf[AnyRef])
@@ -98,4 +81,18 @@ private trait GenTypeModifier {
     case _ => None
   }
 
+  def BASE = classOf[List[Any]]
+
+  override def modifyType(originalType: JavaType, jdkType: Type, context: TypeBindings, typeFactory: TypeFactory) = {
+    if (originalType.containedTypeCount() > 1) {
+      originalType
+    } else {
+      classObjectFor(jdkType) find (BASE.isAssignableFrom(_)) map { cls =>
+        val eltType = if (originalType.containedTypeCount() == 1) originalType.containedType(0) else UNKNOWN
+        typeFactory.constructCollectionLikeType(cls, eltType)
+      } getOrElse originalType
+    }
+  }
+
 }
+

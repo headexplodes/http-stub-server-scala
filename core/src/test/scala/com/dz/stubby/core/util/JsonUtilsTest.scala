@@ -77,4 +77,16 @@ class JsonUtilsTest extends FunSuite {
     assert(map("decimal") === java.math.BigDecimal.valueOf(1.234))
   }
 
+//  test("should deserialize list") {
+//    expectResult(List("foo", "bar")) {
+//      JsonUtils.deserialize[List[String]]("""["foo", "bar"]""")
+//    }
+//  }
+//
+//  test("should deserialize null list as Nil") {
+//    expectResult(Nil) {
+//      JsonUtils.deserialize[List[String]]("null")
+//    }
+//  }
+
 }

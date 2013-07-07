@@ -22,7 +22,7 @@ object JsonUtils {
   def createDefaultMapper() = {
     val mapper = new ObjectMapper with ScalaObjectMapper
     mapper.registerModule(DefaultScalaModule)
-    mapper.registerModule(CustomScalaModule)
+    //mapper.registerModule(CustomScalaModule)
     mapper.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     mapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS) // for 'exact' floating-point matches
     mapper.disable(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS)

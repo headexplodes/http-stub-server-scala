@@ -38,8 +38,13 @@ case class StubRequest(
   def getParams(name: String): Seq[String] =
     params.filter(_.name == name).map(_.value)
 
+  // TODO: better way to do this?
   override def withHeaders(headers: List[StubParam]): StubRequest =
     copy(headers = headers)
+
+  def nilLists() = copy( // for after Jackson deserialization (there _is_ a better way...)
+    params = if (params != null) params else Nil,
+    headers = if (headers != null) headers else Nil)
 }
 
 case class StubResponse(
@@ -47,12 +52,21 @@ case class StubResponse(
     val headers: List[StubParam] = Nil,
     val body: Option[AnyRef] = None) extends StubMessage[StubResponse] {
 
+  // TODO: better way to do this?
   override def withHeaders(headers: List[StubParam]): StubResponse =
     copy(headers = headers)
+
+  def nilLists() = copy( // for after Jackson deserialization (there _is_ a better way...)
+    headers = if (headers != null) headers else Nil)
 }
 
 case class StubExchange(
-  val request: StubRequest,
-  val response: StubResponse,
-  val delay: Option[Long] = None,
-  val script: Option[String] = None)
+    val request: StubRequest,
+    val response: StubResponse,
+    val delay: Option[Long] = None,
+    val script: Option[String] = None) {
+
+  def nilLists() = copy( // for after Jackson deserialization (there _is_ a better way...)
+    request = request.nilLists,
+    response = response.nilLists)
+}
