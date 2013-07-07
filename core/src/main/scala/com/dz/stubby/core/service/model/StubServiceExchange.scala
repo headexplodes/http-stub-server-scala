@@ -3,10 +3,13 @@ package com.dz.stubby.core.service.model
 import scala.collection.mutable.Stack
 import com.dz.stubby.core.model.StubExchange
 import com.dz.stubby.core.model.StubRequest
+import com.fasterxml.jackson.annotation.JsonIgnore
 
 class StubServiceExchange(val exchange: StubExchange) { // wrap exchange model with some extra runtime info
 
+  @JsonIgnore
   val requestPattern: RequestPattern = new RequestPattern(exchange.request)
+  @JsonIgnore
   val attempts: Stack[MatchResult] = new Stack
 
   def matches(message: StubRequest): MatchResult = {

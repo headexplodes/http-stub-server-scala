@@ -9,10 +9,10 @@ import com.dz.stubby.core.model.StubRequest
 class JsonServiceInterface(service: StubService) { // service wrapper using serialized JSON strings/streams
 
   def addResponse(exchange: String) =
-    service.addResponse(JsonUtils.deserialize[StubExchange](exchange))
+    service.addResponse(JsonUtils.deserialize[StubExchange](exchange).nilLists) // nilLists: <HACK/>
 
   def addResponse(stream: InputStream) =
-    service.addResponse(JsonUtils.deserialize[StubExchange](stream))
+    service.addResponse(JsonUtils.deserialize[StubExchange](stream).nilLists) // nilLists: <HACK/>
 
   def getResponse(index: Int) =
     JsonUtils.serialize(service.getResponse(index))

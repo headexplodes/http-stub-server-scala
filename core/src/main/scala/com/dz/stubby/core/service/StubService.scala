@@ -6,7 +6,7 @@ import scala.collection.mutable.ListBuffer
 import com.dz.stubby.core.js.ScriptWorld
 import com.dz.stubby.core.js.Script
 
-class NotFoundException(message: String) extends RuntimeException(message)
+case class NotFoundException(message: String) extends RuntimeException(message)
 
 class StubService {
 
