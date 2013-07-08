@@ -47,10 +47,10 @@ class JsonServiceInterface(service: StubService) { // service wrapper using seri
   def getRequests(stream: OutputStream) =
     JsonUtils.serialize(stream, service.requests)
 
-  def findRequest(filter: StubRequest): String =
+  def findRequests(filter: StubRequest): String =
     JsonUtils.serialize(service.findRequests(filter))
 
-  def findRequest(filter: StubRequest, wait: Long): String =
+  def findRequests(filter: StubRequest, wait: Long): String =
     JsonUtils.serialize(service.findRequests(filter, wait))
 
   def findRequest(stream: OutputStream, filter: StubRequest) =

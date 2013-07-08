@@ -2,15 +2,15 @@ package com.dz.stubby.standalone
 
 import org.apache.commons.io.IOUtils
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler
-import org.jboss.netty.handler.codec.http.{HttpResponse=>NHttpResponse}
-
+import org.jboss.netty.handler.codec.http.{HttpResponse => NHttpResponse}
+import com.dz.stubby.core.model.StubParam
+import com.dz.stubby.core.model.StubRequest
 import com.dz.stubby.core.model.StubResponse
 import com.dz.stubby.core.service.JsonServiceInterface
 import com.dz.stubby.core.service.NotFoundException
 import com.dz.stubby.core.service.StubService
 import com.dz.stubby.core.service.model.StubServiceResult
 import com.dz.stubby.core.util.JsonUtils
-
 import unfiltered.netty.Http
 import unfiltered.netty.ReceivedMessage
 import unfiltered.netty.ServerErrorResponse
@@ -19,6 +19,7 @@ import unfiltered.request.DELETE
 import unfiltered.request.GET
 import unfiltered.request.HttpRequest
 import unfiltered.request.POST
+import unfiltered.request.Params
 import unfiltered.request.Path
 import unfiltered.request.Seg
 import unfiltered.response.ComposeResponse
@@ -30,6 +31,7 @@ import unfiltered.response.Responder
 import unfiltered.response.ResponseFunction
 import unfiltered.response.ResponseString
 import unfiltered.response.ResponseWriter
+import com.dz.stubby.core.util.RequestFilterBuilder
 
 case class JsonResponse(json: String)
   extends ComposeResponse(JsonContent ~> ResponseString(json))
@@ -69,28 +71,32 @@ class Server {
       case NotFoundException(message) =>
         NotFound ~> ResponseString(message)
     }
-    
-  // TODO: need support for filtering requests...
 
-  def getRequests =
-    JsonResponse(jsonService.getRequests)
+  def findRequests(req: HttpRequest[_]) =
+    JsonResponse(jsonService.findRequests(createFilter(req)))
+  def findRequests(req: HttpRequest[_], wait: Int) =
+    JsonResponse(jsonService.findRequests(createFilter(req), wait))
+    
   def getRequest(index: Int) = handleNotFound {
     JsonResponse(jsonService.getRequest(index))
   }
-
-  def deleteRequests =
+  
+  def deleteRequests() =
     EmptyOk(jsonService.deleteRequests)
   def deleteRequest(index: Int) = handleNotFound {
     EmptyOk(jsonService.deleteRequest(index))
   }
 
-  def getResponses =
+  private def createFilter(req: HttpRequest[_]) = 
+    RequestFilterBuilder.makeFilter(Transformer.parseQuery(req))
+
+  def getResponses() =
     JsonResponse(jsonService.getResponses)
   def getResponse(index: Int) = handleNotFound {
     JsonResponse(jsonService.getResponse(index))
   }
 
-  def deleteResponses =
+  def deleteResponses() =
     EmptyOk(jsonService.deleteResponses)
   def deleteResponse(index: Int) = handleNotFound {
     EmptyOk(jsonService.deleteResponse(index))
@@ -110,6 +116,10 @@ class Server {
   }
 }
 
+object WaitParam extends Params.Extract(
+  "wait", Params.first ~> Params.int ~> Params.pred { _ > 0 }
+)
+
 class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse {
   def intent = {
     case req @ Path(Seg("_control" :: "responses" :: Nil)) => req match {
@@ -122,7 +132,10 @@ class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with Serv
       case DELETE(_) => server.deleteResponse(id.toInt)
     }
     case req @ Path(Seg("_control" :: "requests" :: Nil)) => req match {
-      case GET(_) => server.getRequests // TODO: need support for filtering requests...
+      case GET(_) => req match {
+        case WaitParam(wait) => server.findRequests(req, wait)
+        case _ => server.findRequests(req)
+      }
       case DELETE(_) => server.deleteRequests
     }
     case req @ Path(Seg("_control" :: "requests" :: id :: Nil)) => req match {

@@ -63,7 +63,7 @@ case class StubResponse(
 case class StubExchange(
     val request: StubRequest,
     val response: StubResponse,
-    val delay: Option[Long] = None,
+    val delay: Option[Int] = None,
     val script: Option[String] = None) {
 
   def nilLists() = copy( // for after Jackson deserialization (there _is_ a better way...)

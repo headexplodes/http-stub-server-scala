@@ -33,7 +33,7 @@ class ScriptTest extends FunSuite {
   val jsonRequest = request.copy(body = jsonBodyScala)
   val jsonResponse = response.copy(body = jsonBodyScala)
 
-  implicit def createWorld: ScriptWorld = new ScriptWorld(request, response, Some(1234L))
+  implicit def createWorld: ScriptWorld = new ScriptWorld(request, response, Some(1234))
 
   def executeScript(script: String)(implicit world: ScriptWorld): Any =
     new Script(script).execute(world)
@@ -94,14 +94,14 @@ class ScriptTest extends FunSuite {
   }
 
   test("get request JSON body") {
-    val world = new ScriptWorld(jsonRequest, jsonResponse, Some(1234L))
+    val world = new ScriptWorld(jsonRequest, jsonResponse, Some(1234))
 
     assert(executeScript("exchange.request.body.get('items').get(0)")(world) === "one")
     assert(executeScript("exchange.request.body.get('items').get(1)")(world) === "two")
   }
 
   test("get response JSON body") {
-    val world = new ScriptWorld(jsonRequest, jsonResponse, Some(1234L))
+    val world = new ScriptWorld(jsonRequest, jsonResponse, Some(1234))
 
     assert(executeScript("exchange.response.body.get('items').get(0)")(world) === "one")
     assert(executeScript("exchange.response.body.get('items').get(1)")(world) === "two")
@@ -111,7 +111,7 @@ class ScriptTest extends FunSuite {
     type AnyMap = Map[String, _]
     type AnySeq = Seq[_]
 
-    val world = new ScriptWorld(jsonRequest, jsonResponse, Some(1234L))
+    val world = new ScriptWorld(jsonRequest, jsonResponse, Some(1234))
 
     executeScript("exchange.request.body.get('items').add('three')")(world) // should have no effect
     executeScript("exchange.response.body.get('items').add('three')")(world)

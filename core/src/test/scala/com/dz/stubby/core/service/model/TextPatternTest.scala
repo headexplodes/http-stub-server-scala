@@ -22,4 +22,16 @@ class TextPatternTest extends FunSuite {
     assert(new TextPattern("foo") === Pattern.compile("foo"))
   }
 
+  test("matches") {
+    assert(new TextPattern("fo+").matches("foo"))
+  }
+
+  test("doesn't match sub-string") {
+    assert(!new TextPattern("fo+").matches("foobar"))
+  }
+
+  test("matches entire string") {
+    assert(new TextPattern("fo+").matches("foo"))
+  }
+
 }

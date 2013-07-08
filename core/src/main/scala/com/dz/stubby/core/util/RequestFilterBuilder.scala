@@ -25,6 +25,7 @@ object RequestFilterBuilder {
         filter.copy(params = filter.params :+ StubParam(paramName, param.value))
       case HeaderPattern(headerName) =>
         filter.copy(headers = filter.headers :+ StubParam(headerName, param.value))
+      case _ => filter 
     }
 
 }

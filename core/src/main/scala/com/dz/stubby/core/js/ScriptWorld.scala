@@ -75,21 +75,21 @@ case class ScriptResponse(
 class ScriptWorld(
     private val request: ScriptRequest,
     private val response: ScriptResponse,
-    private var delay: Option[Long] = None) {
+    private var delay: Option[Int] = None) {
 
-  def this(request: StubRequest, response: StubResponse, delay: Option[Long]) = this(
+  def this(request: StubRequest, response: StubResponse, delay: Option[Int]) = this(
     new ScriptRequest(request),
     new ScriptResponse(response),
     delay)
 
-  def getDelay: java.lang.Long = delay.getOrElse(null.asInstanceOf[Long]).longValue
-  def setDelay(delay: java.lang.Long): Unit = {
+  def getDelay: java.lang.Integer = delay.getOrElse(null.asInstanceOf[Int]).intValue
+  def setDelay(delay: java.lang.Integer): Unit = {
     this.delay = if (delay == null) null else Some(delay)
   }
 
   def getRequest: ScriptRequest = request
   def getResponse: ScriptResponse = response
 
-  def result: Pair[StubResponse, Option[Long]] = (response.toStubResponse, delay)
+  def result: Pair[StubResponse, Option[Int]] = (response.toStubResponse, delay)
 
 }

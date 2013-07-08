@@ -42,10 +42,15 @@ class TextBodyPatternTest extends FunSuite with BeforeAndAfter {
   test("matches") {
     assertRequestMatches(".*")
     assertRequestMatches("f[o]+")
+    assertRequestMatches("(.+)")
   }
 
-  test("doesn't match") {
+  test("doesn't match different pattern") {
     assertRequestDoesNotMatch("b..")
+  }
+  
+  test("doesn't match partial string") {
+    assertRequestDoesNotMatch("f")
   }
 
   test("equality") {

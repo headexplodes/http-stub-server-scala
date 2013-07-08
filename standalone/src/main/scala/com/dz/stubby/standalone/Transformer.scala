@@ -21,7 +21,7 @@ object Transformer {
     StubRequest(
       Some(src.method.toUpperCase), // method should always be upper-case
       Some(uri.getPath),
-      parseQuery(uri).map(p => StubParam(p.getName, p.getValue)),
+      parseQuery(src),
       toStubHeaders(src).toList,
       convertBody(src)
     )
@@ -30,6 +30,11 @@ object Transformer {
   private def parseQuery(uri: URI): List[NameValuePair] =
     collectionAsScalaIterable(URLEncodedUtils.parse(uri, "UTF-8")).toList
 
+  def parseQuery(src: HttpRequest[_]): List[StubParam] = {
+    val uri = new URI(src.uri)
+    parseQuery(uri).map(p => StubParam(p.getName, p.getValue))
+  } 
+    
   private def convertBody(src: HttpRequest[ReceivedMessage]): Option[AnyRef] = {
     if (hasBody(src)) {
       Some(IOUtils.toString(src.inputStream))

@@ -12,8 +12,8 @@ case class TextBodyPattern(val pattern: TextPattern) extends BodyPattern {
     val actual = HttpMessageUtils.bodyAsText(request);
     val field = new PartialMatchField(FieldType.BODY, "body", pattern.pattern.toString)
     if (HttpMessageUtils.isText(request)) { // require text body
-      pattern.findFirstIn(actual) match { // match pattern against entire body
-        case Some(_) => field.asMatch(actual)
+      actual match { // match pattern against entire body
+        case pattern() => field.asMatch(actual) // TODO: this doesn't 
         case _ => field.asMatchFailure(actual)
       }
     } else {

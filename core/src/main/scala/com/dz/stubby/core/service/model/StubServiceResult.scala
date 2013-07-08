@@ -5,7 +5,7 @@ import com.dz.stubby.core.model.StubResponse
 class StubServiceResult( // returned by the 'findMatch' method
     val attempts: List[MatchResult],
     val response: Option[StubResponse],
-    val delay: Option[Long]) {
+    val delay: Option[Int]) {
   
   def this(attempts: List[MatchResult]) = this(attempts, None, None)
   

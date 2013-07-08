@@ -46,7 +46,7 @@ case class RequestPattern(
         message.method match {
           case None => methodField.asNotFound
           case Some(m) => {
-            ptn.findFirstIn(m) match {
+            ptn.findFirstIn(m) match { // TODO: this matches partial strings...
               case Some(_) => methodField.asMatch(m)
               case None => methodField.asMatchFailure(m)
             }
@@ -58,13 +58,11 @@ case class RequestPattern(
     def matchPath: Option[MatchField] = {
       path.map { ptn =>
         val pathField = new PartialMatchField(FieldType.PATH, "path", path.get)
-        message.path match {
+        message.path match { // TODO: this doesn't work with groups...
           case None => pathField.asNotFound
-          case Some(m) => {
-            ptn.findFirstIn(m) match {
-              case Some(_) => pathField.asMatch(m)
-              case None => pathField.asMatchFailure(m)
-            }
+          case Some(m) => m match {
+            case ptn(_) => pathField.asMatch(m)
+            case _ => pathField.asMatchFailure(m)
           }
         }
       }

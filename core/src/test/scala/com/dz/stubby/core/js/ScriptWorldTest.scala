@@ -15,7 +15,7 @@ class ScriptWorldTest extends FunSuite {
   val response = new StubResponse(status = 200)
 
   test("create world from exchange") {
-    val world = new ScriptWorld(request, response, Some(1234L))
+    val world = new ScriptWorld(request, response, Some(1234))
 
     assert(world.getDelay === 1234)
     assert(world.getRequest.getPath === "/path")
@@ -23,7 +23,7 @@ class ScriptWorldTest extends FunSuite {
   }
 
   test("generate updated exchange") {
-    val world = new ScriptWorld(request, response, Some(1234L))
+    val world = new ScriptWorld(request, response, Some(1234))
 
     world.setDelay(4321)
     world.getResponse.setStatus(500)
