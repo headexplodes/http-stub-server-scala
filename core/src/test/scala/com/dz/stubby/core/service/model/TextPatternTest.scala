@@ -26,12 +26,12 @@ class TextPatternTest extends FunSuite {
     assert(new TextPattern("fo+").matches("foo"))
   }
 
+  test("matches with groups") {
+    assert(new TextPattern("(f)(o)+").matches("foo"))
+  }
+  
   test("doesn't match sub-string") {
     assert(!new TextPattern("fo+").matches("foobar"))
-  }
-
-  test("matches entire string") {
-    assert(new TextPattern("fo+").matches("foo"))
   }
 
 }

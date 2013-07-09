@@ -2,7 +2,7 @@ package com.dz.stubby.standalone
 
 import org.apache.commons.io.IOUtils
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler
-import org.jboss.netty.handler.codec.http.{HttpResponse => NHttpResponse}
+import org.jboss.netty.handler.codec.http.{ HttpResponse => NHttpResponse }
 import com.dz.stubby.core.model.StubParam
 import com.dz.stubby.core.model.StubRequest
 import com.dz.stubby.core.model.StubResponse
@@ -76,18 +76,18 @@ class Server {
     JsonResponse(jsonService.findRequests(createFilter(req)))
   def findRequests(req: HttpRequest[_], wait: Int) =
     JsonResponse(jsonService.findRequests(createFilter(req), wait))
-    
+
   def getRequest(index: Int) = handleNotFound {
     JsonResponse(jsonService.getRequest(index))
   }
-  
+
   def deleteRequests() =
     EmptyOk(jsonService.deleteRequests)
   def deleteRequest(index: Int) = handleNotFound {
     EmptyOk(jsonService.deleteRequest(index))
   }
 
-  private def createFilter(req: HttpRequest[_]) = 
+  private def createFilter(req: HttpRequest[_]) =
     RequestFilterBuilder.makeFilter(Transformer.parseQuery(req))
 
   def getResponses() =
@@ -133,7 +133,7 @@ class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with Serv
     }
     case req @ Path(Seg("_control" :: "requests" :: Nil)) => req match {
       case GET(_) => req match {
-        case WaitParam(wait) => server.findRequests(req, wait)
+        case Params(WaitParam(wait)) => server.findRequests(req, wait)
         case _ => server.findRequests(req)
       }
       case DELETE(_) => server.deleteRequests
@@ -148,10 +148,20 @@ class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with Serv
   }
 }
 
+//class TestingPlan extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse {
+//  def intent = {
+//    case WaitParam(wait) => {
+//      val theParams = wait
+//      Ok
+//    }
+//  }
+//}
+
 object Main {
   def main(args: Array[String]) {
     if (args.length > 0) {
       Http(args(0).toInt).plan(new AppPlan(new Server)).run()
+      //Http(args(0).toInt).plan(new TestingPlan).run()
     } else {
       throw new RuntimeException("Usage: java ... <port>")
     }

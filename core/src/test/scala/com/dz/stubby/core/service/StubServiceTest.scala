@@ -161,7 +161,7 @@ class StubServiceTest extends FunSuite {
     service.findMatch(StubRequest(path = "/test"))
 
     val filter = new StubRequest(path = "/not/found")
-    assert(service.findRequests(filter).size === 0)
+    assert(service.findRequests(filter, 2000).size === 0)
   }
 
   test("requets filter with wait") {

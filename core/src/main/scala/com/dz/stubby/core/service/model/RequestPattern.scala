@@ -45,11 +45,9 @@ case class RequestPattern(
         val methodField = new PartialMatchField(FieldType.METHOD, "method", method.get)
         message.method match {
           case None => methodField.asNotFound
-          case Some(m) => {
-            ptn.findFirstIn(m) match { // TODO: this matches partial strings...
-              case Some(_) => methodField.asMatch(m)
-              case None => methodField.asMatchFailure(m)
-            }
+          case Some(m) => ptn.unapplySeq(m) match {
+            case Some(_) => methodField.asMatch(m)
+            case None => methodField.asMatchFailure(m)
           }
         }
       }
@@ -58,11 +56,11 @@ case class RequestPattern(
     def matchPath: Option[MatchField] = {
       path.map { ptn =>
         val pathField = new PartialMatchField(FieldType.PATH, "path", path.get)
-        message.path match { // TODO: this doesn't work with groups...
+        message.path match {
           case None => pathField.asNotFound
-          case Some(m) => m match {
-            case ptn(_) => pathField.asMatch(m)
-            case _ => pathField.asMatchFailure(m)
+          case Some(m) => ptn.unapplySeq(m) match {
+            case Some(_) => pathField.asMatch(m)
+            case None => pathField.asMatchFailure(m)
           }
         }
       }
@@ -84,14 +82,15 @@ case class RequestPattern(
       } else {
         values.find(p => pattern.pattern.matches(p)) match {
           case Some(v) => field.asMatch(v)
-          case None => field.asMatchFailure(if (values.size > 1) values else values.head) // don't wrap in array if only single value
+          case None => field.asMatchFailure(
+            if (values.size > 1) values else values.head) // don't wrap in array if only single value
         }
       }
     }
 
     def matchParam(pattern: ParamPattern): MatchField = {
       matchParamValues(
-        message.getParams(pattern.name), // case insensitive lookup
+        message.getParams(pattern.name), // case sensitive lookup
         new PartialMatchField(FieldType.QUERY_PARAM, pattern.name, pattern.pattern),
         pattern)
     }

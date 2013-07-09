@@ -54,7 +54,7 @@ class RequestPatternTest extends FunSuite with ShouldMatchers {
     assert(new RequestPattern(stubbedRequest).hashCode === new RequestPattern(stubbedRequest).hashCode)
   }
 
-  test("construct from pattern") {
+  test("construct from stubbed request") {
     val pattern = new RequestPattern(stubbedRequest)
 
     assert(pattern.method.get === "PO.*")
@@ -116,7 +116,21 @@ class RequestPatternTest extends FunSuite with ShouldMatchers {
 
     assert(result.matches)
   }
+        
+  test("matches parameter with groups in pattern") {
+    val pattern = stubbedRequest.copy(params = List(StubParam("foo", "(b)(a)r")))
+    val result = new RequestPattern(pattern).matches(incomingRequest)
+    
+    assert(result.matches)
+  }
 
+  test("doesn't match partial parameter value") {
+    val pattern = stubbedRequest.copy(params = List(StubParam("foo", "b")))
+    val result = new RequestPattern(pattern).matches(incomingRequest)
+
+    assert(!result.matches)
+  }
+  
   test("doesn't match incorrect params") {
     val incoming = incomingRequest.copy(params = List(StubParam("foo", "invalid")))
     val result = new RequestPattern(stubbedRequest).matches(incoming)
@@ -137,6 +151,20 @@ class RequestPatternTest extends FunSuite with ShouldMatchers {
     val result = new RequestPattern(stubbedRequest).matches(incoming)
 
     assert(result.matches)
+  }
+  
+  test("matches header value with groups in pattern") {
+    val pattern = stubbedRequest.copy(headers = List(StubParam("Content-Type", "(text/plain); (.+)")))
+    val result = new RequestPattern(stubbedRequest).matches(incomingRequest)
+
+    assert(result.matches)
+  }
+
+  test("doesn't match partial header value") {
+    val pattern = stubbedRequest.copy(headers = List(StubParam("Content-Type", "text")))
+    val result = new RequestPattern(pattern).matches(incomingRequest)
+
+    assertMatchFailure(HEADER, "Content-Type", "text", "text/plain; charset=UTF-8")(result)
   }
 
   test("doesn't match incorrect headers") {
@@ -167,12 +195,47 @@ class RequestPatternTest extends FunSuite with ShouldMatchers {
 
     assertNotFound(BODY, "body", "<pattern>")(result)
   }
+  
+  test("matches method pattern with groups") {
+    val pattern = stubbedRequest.copy(method = "(PO)(.*)")
+    val result = new RequestPattern(pattern).matches(incomingRequest)
 
+    assert(result.matches)
+  }
+  
   test("doesn't match when wrong method") {
     val incoming = incomingRequest.copy(method = "HEAD")
     val result = new RequestPattern(stubbedRequest).matches(incoming)
 
     assertMatchFailure(METHOD, "method", "PO.*", "HEAD")(result)
+  }
+  
+  test("doesn't match partial method string") {
+    val incoming = incomingRequest.copy(method = "XPOST")
+    val result = new RequestPattern(stubbedRequest).matches(incoming)
+
+    assertMatchFailure(METHOD, "method", "PO.*", "XPOST")(result)
+  }
+  
+  test("matches path with groups") {
+    val pattern = stubbedRequest.copy(path = "/(request)/(.*)")
+    val result = new RequestPattern(pattern).matches(incomingRequest)
+
+    assert(result.matches)
+  }
+  
+  test("doesn't match incorrect path") {
+    val incoming = incomingRequest.copy(path = "/invalid")
+    val result = new RequestPattern(stubbedRequest).matches(incoming)
+
+    assertMatchFailure(PATH, "path", "/request/.*", "/invalid")(result)
+  }
+  
+  test("doesn't match partial path string") {
+    val incoming = incomingRequest.copy(path = "/invalid/request/test")
+    val result = new RequestPattern(stubbedRequest).matches(incoming)
+
+    assertMatchFailure(PATH, "path", "/request/.*", "/invalid/request/test")(result)
   }
 
 }
