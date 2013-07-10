@@ -5,10 +5,14 @@ import com.dz.stubby.core.model._
 import scala.collection.mutable.ListBuffer
 import com.dz.stubby.core.js.ScriptWorld
 import com.dz.stubby.core.js.Script
+import com.typesafe.scalalogging.log4j.Logging
+import com.dz.stubby.core.util.JsonUtils
 
 case class NotFoundException(message: String) extends RuntimeException(message)
 
-class StubService {
+class StubService extends Logging {
+
+  val LOGGER = logger // make logging stand out...
 
   val requests: ListBuffer[StubRequest] = new ListBuffer
   val responses: ListBuffer[StubServiceExchange] = new ListBuffer
@@ -21,29 +25,29 @@ class StubService {
 
   def findMatch(request: StubRequest): StubServiceResult = this.synchronized {
     try {
-      //LOGGER.trace("Got request: " + JsonUtils.prettyPrint(request))
+      LOGGER.trace("Got request: " + JsonUtils.prettyPrint(request))
       request +=: requests // prepend
       val attempts = new ListBuffer[MatchResult]
       for (response <- responses) {
         val matchResult = response.matches(request)
         attempts += matchResult
         if (matchResult.matches) {
-          //LOGGER.info("Matched: " + request.getPath() + "")
+          LOGGER.info("Matched: " + request.path.get)
           val exchange = response.exchange
           return exchange.script match {
             case Some(script) => {
-                val world = new ScriptWorld(request, exchange.response, exchange.delay) // creates deep copies of objects
-                new Script(script).execute(world)
-                val (scriptResponse, scriptDelay) = world.result
-                new StubServiceResult(
-                  attempts.toList, Some(scriptResponse), scriptDelay)
+              val world = new ScriptWorld(request, exchange.response, exchange.delay) // creates deep copies of objects
+              new Script(script).execute(world)
+              val (scriptResponse, scriptDelay) = world.result
+              new StubServiceResult(
+                attempts.toList, Some(scriptResponse), scriptDelay)
             }
             case None => new StubServiceResult(
               attempts.toList, Some(exchange.response), exchange.delay)
           }
         }
       }
-      //LOGGER.info("Didn't match: " + request.getPath())
+      LOGGER.info("Didn't match: " + request.path.get)
       this.notifyAll // inform any waiting threads that a new request has come in
       new StubServiceResult(Nil) // no match (empty list)
     } catch {
@@ -63,7 +67,7 @@ class StubService {
   }
 
   def deleteResponse(index: Int) = this.synchronized {
-    //LOGGER.trace("Deleting response: " + index)
+    LOGGER.trace("Deleting response: " + index)
     try {
       responses.remove(index)
     } catch {
@@ -73,7 +77,7 @@ class StubService {
   }
 
   def deleteResponses() = this.synchronized {
-    //LOGGER.trace("Deleting all responses")
+    LOGGER.trace("Deleting all responses")
     responses.clear
   }
 
@@ -114,7 +118,7 @@ class StubService {
 
   @throws[NotFoundException]("if index does not exist")
   def deleteRequest(index: Int) = this.synchronized {
-    //LOGGER.trace("Deleting request: " + index)
+    LOGGER.trace("Deleting request: " + index)
     try {
       requests.remove(index)
     } catch {
@@ -124,7 +128,7 @@ class StubService {
   }
 
   def deleteRequests() = this.synchronized {
-    //LOGGER.trace("Deleting all requests")
+    LOGGER.trace("Deleting all requests")
     requests.clear
   }
 

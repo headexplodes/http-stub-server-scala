@@ -65,7 +65,9 @@ object Dependencies {
   lazy val runtime = Seq(
     "org.apache.commons" % "commons-lang3" % "3.1",
     "org.apache.commons" % "commons-io" % "1.3.2",
-    "org.apache.httpcomponents" % "httpclient" % "4.2.5" withSources()
+    "org.apache.httpcomponents" % "httpclient" % "4.2.5" withSources(),
+    "com.typesafe" %% "scalalogging-log4j" % "1.0.1" withSources(),
+    "org.apache.logging.log4j" % "log4j-core" % "2.0-beta3" withSources()
   )
 
   lazy val test = Seq(
