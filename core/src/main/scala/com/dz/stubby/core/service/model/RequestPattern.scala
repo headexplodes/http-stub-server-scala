@@ -18,8 +18,8 @@ object RequestPattern {
   def toBodyPattern(obj: Option[AnyRef]): Option[BodyPattern] = obj.map {
     _ match {
       case str: String => new TextBodyPattern(str)
-      case coll @ (_: Map[_, _] | _: List[_]) => new JsonBodyPattern(coll)
-      case _ => throw new RuntimeException("Unexpected body type: " + obj.getClass)
+      case coll @ (_: collection.Map[_, _] | _: collection.Seq[_]) => new JsonBodyPattern(coll)
+      case x @ _ => throw new RuntimeException("Unexpected body type: " + x.getClass)
     }
   }
 }

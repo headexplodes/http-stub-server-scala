@@ -148,20 +148,10 @@ class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with Serv
   }
 }
 
-//class TestingPlan extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse {
-//  def intent = {
-//    case WaitParam(wait) => {
-//      val theParams = wait
-//      Ok
-//    }
-//  }
-//}
-
 object Main {
   def main(args: Array[String]) {
     if (args.length > 0) {
       Http(args(0).toInt).plan(new AppPlan(new Server)).run()
-      //Http(args(0).toInt).plan(new TestingPlan).run()
     } else {
       throw new RuntimeException("Usage: java ... <port>")
     }

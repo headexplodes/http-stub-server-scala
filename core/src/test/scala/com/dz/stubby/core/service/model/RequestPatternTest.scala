@@ -81,16 +81,32 @@ class RequestPatternTest extends FunSuite with ShouldMatchers {
     assert(pattern.headers.isEmpty)
   }
 
-  test("JSON body pattern object") {
+  test("JSON body pattern map") {
     val body = Map("foo" -> "bar")
     val request = new StubRequest(body = body)
     val pattern = new RequestPattern(request)
 
     assert(pattern.body.get === new JsonBodyPattern(body))
   }
+  
+  test("JSON body pattern mutable map") {
+    val body = collection.mutable.Map("foo" -> "bar")
+    val request = new StubRequest(body = body)
+    val pattern = new RequestPattern(request)
 
+    assert(pattern.body.get === new JsonBodyPattern(body))
+  }
+  
   test("JSON body pattern list") {
-    val body = List("foo" -> "bar")
+    val body = List("foo", "bar")
+    val request = new StubRequest(body = body)
+    val pattern = new RequestPattern(request)
+
+    assert(pattern.body.get === new JsonBodyPattern(body))
+  }
+  
+  test("JSON body pattern mutable list") {
+    val body = collection.mutable.ListBuffer("foo", "bar")
     val request = new StubRequest(body = body)
     val pattern = new RequestPattern(request)
 

@@ -13,7 +13,7 @@ class StubService {
   val requests: ListBuffer[StubRequest] = new ListBuffer
   val responses: ListBuffer[StubServiceExchange] = new ListBuffer
 
-  def addResponse(exchange: StubExchange): Unit = {
+  def addResponse(exchange: StubExchange): Unit = this.synchronized {
     val internal = new StubServiceExchange(exchange)
     responses -= internal // remove existing stubed request (ie, will never match anymore)
     internal +=: responses // ensure most recent matched first   
