@@ -7,6 +7,7 @@ import com.dz.stubby.core.js.ScriptWorld
 import com.dz.stubby.core.js.Script
 import com.typesafe.scalalogging.log4j.Logging
 import com.dz.stubby.core.util.JsonUtils
+import com.dz.stubby.core.util.TimeLimit
 
 case class NotFoundException(message: String) extends RuntimeException(message)
 
@@ -92,23 +93,20 @@ class StubService extends Logging {
   }
 
   def findRequests(filter: StubRequest, timeout: Long): Traversable[StubRequest] = this.synchronized { // blocking call
-    var remaining: Long = timeout // TODO: refactor to make more functional...
-    while (remaining > 0) {
+    TimeLimit.retry(timeout) { remaining =>
       val result = findRequests(filter)
       if (result.isEmpty) {
         try {
-          val start = System.currentTimeMillis
           this.wait(remaining) // wait for a request to come in, or time to expire
-          remaining -= System.currentTimeMillis - start
         } catch {
           case e: InterruptedException =>
             throw new RuntimeException("Interrupted while waiting for request")
         }
+        None // retry
       } else {
-        return result
+        Some(result) // found
       }
-    }
-    return Nil
+    }.getOrElse(Nil)
   }
 
   def findRequests(filter: StubRequest): Traversable[StubRequest] = this.synchronized {
