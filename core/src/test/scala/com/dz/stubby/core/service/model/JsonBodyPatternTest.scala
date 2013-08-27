@@ -13,7 +13,7 @@ class JsonBodyPatternTest extends FunSuite {
 
   def parse(json: String) = JsonUtils.deserializeObject(json)
 
-  def message(bodyJson: String) =
+  def message(bodyJson: String): StubRequest =
     new StubRequest(
       body = parse(bodyJson),
       headers = List(StubParam("Content-Type", "application/json")))

@@ -8,7 +8,7 @@ case class TextBodyPattern(val pattern: TextPattern) extends BodyPattern {
 
   def this(pattern: String) = this(new TextPattern(pattern))
   
-  override def matches(request: StubMessage[_]) = {
+  override def matches(request: StubMessage) = {
     val actual = HttpMessageUtils.bodyAsText(request);
     val field = new PartialMatchField(FieldType.BODY, "body", pattern.pattern.toString)
     if (HttpMessageUtils.isText(request)) { // require text body

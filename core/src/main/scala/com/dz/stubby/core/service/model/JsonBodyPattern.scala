@@ -11,7 +11,7 @@ class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
     def message: String = "%s (at '%s')".format(reason, path)
   }
 
-  override def matches(request: StubMessage[_]): MatchField = {
+  override def matches(request: StubMessage): MatchField = {
     val expected = JsonUtils.prettyPrint(pattern)
     val actual = JsonUtils.prettyPrint(request.body)
     val result = matchResult(request)
@@ -31,7 +31,7 @@ class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
    * property in the request body. All fields in pattern are assumed to
    * be regular expressions. All strings are converted to strings for matching.
    */
-  private def matchResult(request: StubMessage[_]): MatchResult = {
+  private def matchResult(request: StubMessage): MatchResult = {
     if (HttpMessageUtils.isJson(request)) { // require a JSON body
       matchValue(pattern, HttpMessageUtils.bodyAsJson(request), ""); // root could be any type (eg, an array)
     } else {

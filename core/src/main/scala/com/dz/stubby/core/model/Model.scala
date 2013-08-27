@@ -4,43 +4,44 @@ case class StubParam(
   name: String,
   value: String)
 
-trait StubHeaders[T <: StubHeaders[T]] {
-  val headers: List[StubParam]
+abstract class StubMessage(
+    val headers: List[StubParam],
+    val body: Option[AnyRef]) {
+  
+  type T <: StubMessage 
 
-  def withHeaders(headers: List[StubParam]): T
-
+  def copyWith(headers: List[StubParam] = headers, body: Option[AnyRef] = body): T
+  
   def getHeader(name: String): Option[String] =
     headers.find(_.name.equalsIgnoreCase(name)).map(_.value)
   def getHeaders(name: String): Seq[String] =
     headers.filter(_.name.equalsIgnoreCase(name)).map(_.value)
 
   def addHeader(name: String, value: String): T =
-    withHeaders(headers :+ StubParam(name, value))
+    copyWith(headers :+ StubParam(name, value))
   def removeHeader(name: String): T =
-    withHeaders(headers.filterNot(_.name.equalsIgnoreCase(name)))
-  def setHeader(name: String, value: String): T =
+    copyWith(headers.filterNot(_.name.equalsIgnoreCase(name)))
+  def setHeader(name: String, value: String): T#T = 
     removeHeader(name).addHeader(name, value)
-}
-
-trait StubMessage[T <: StubHeaders[T]] extends StubHeaders[T] {
-  val body: Option[AnyRef]
+    
 }
 
 case class StubRequest(
     val method: Option[String] = None, // optional so we can create filters
     val path: Option[String] = None,
     val params: List[StubParam] = Nil,
-    val headers: List[StubParam] = Nil,
-    val body: Option[AnyRef] = None) extends StubMessage[StubRequest] {
+    override val headers: List[StubParam] = Nil,
+    override val body: Option[AnyRef] = None) extends StubMessage(headers, body) {
 
+  type T = StubRequest
+  
   def getParam(name: String): Option[String] =
     params.find(_.name.equalsIgnoreCase(name)).map(_.value)
   def getParams(name: String): Seq[String] =
     params.filter(_.name == name).map(_.value)
 
-  // TODO: better way to do this?
-  override def withHeaders(headers: List[StubParam]): StubRequest =
-    copy(headers = headers)
+  override def copyWith(headers: List[StubParam], body: Option[AnyRef]): StubRequest =
+    copy(headers = headers, body = body)
 
   def nilLists() = copy( // for after Jackson deserialization (there _is_ a better way...)
     params = if (params != null) params else Nil,
@@ -49,12 +50,13 @@ case class StubRequest(
 
 case class StubResponse(
     val status: Int,
-    val headers: List[StubParam] = Nil,
-    val body: Option[AnyRef] = None) extends StubMessage[StubResponse] {
+    override val headers: List[StubParam] = Nil,
+    override val body: Option[AnyRef] = None) extends StubMessage(headers, body) {
 
-  // TODO: better way to do this?
-  override def withHeaders(headers: List[StubParam]): StubResponse =
-    copy(headers = headers)
+  type T = StubResponse
+  
+  override def copyWith(headers: List[StubParam], body: Option[AnyRef]): StubResponse =
+    copy(headers = headers, body = body)
 
   def nilLists() = copy( // for after Jackson deserialization (there _is_ a better way...)
     headers = if (headers != null) headers else Nil)
