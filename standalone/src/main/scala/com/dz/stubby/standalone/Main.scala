@@ -1,15 +1,10 @@
 package com.dz.stubby.standalone
 
 import org.apache.commons.io.IOUtils
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler
-import org.jboss.netty.handler.codec.http.{ HttpResponse => NHttpResponse }
-import com.dz.stubby.core.model.StubParam
-import com.dz.stubby.core.model.StubRequest
 import com.dz.stubby.core.model.StubResponse
 import com.dz.stubby.core.service.JsonServiceInterface
 import com.dz.stubby.core.service.NotFoundException
 import com.dz.stubby.core.service.StubService
-import com.dz.stubby.core.service.model.StubServiceResult
 import com.dz.stubby.core.util.JsonUtils
 import unfiltered.netty.Http
 import unfiltered.netty.ReceivedMessage
@@ -30,8 +25,8 @@ import unfiltered.response.Ok
 import unfiltered.response.Responder
 import unfiltered.response.ResponseFunction
 import unfiltered.response.ResponseString
-import unfiltered.response.ResponseWriter
 import com.dz.stubby.core.util.RequestFilterBuilder
+import java.io.File
 
 case class JsonResponse(json: String)
   extends ComposeResponse(JsonContent ~> ResponseString(json))
@@ -58,11 +53,12 @@ case class StubUnfilteredResponse(result: StubResponse) extends Responder[Any] {
   }
 }
 
-class Server {
+class Server(paths:Seq[File]) {
   import Transformer._
 
   val service = new StubService
   val jsonService = new JsonServiceInterface(service)
+  val fileSource = new FileSource(paths, service, jsonService).loadInitialFiles()
 
   private def handleNotFound[T >: ResponseFunction[Any]](body: => T): T =
     try {
@@ -151,9 +147,31 @@ class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with Serv
 object Main {
   def main(args: Array[String]) {
     if (args.length > 0) {
-      Http(args(0).toInt).plan(new AppPlan(new Server)).run()
+      val paths = parseFileArgs(args.tail)
+      Http(args(0).toInt).plan(new AppPlan(new Server(paths))).run()
     } else {
       throw new RuntimeException("Usage: java ... <port>")
+    }
+  }
+
+  def parseFileArgs(args:Array[String]) = {
+    args.flatMap(loadFolder)
+  }
+
+  def loadFolder(name:String) = {
+    val folder = new File(name)
+    def err = (msg:String) => {
+      System.err.println(s"folder: $name $msg, skipping")
+      None
+    }
+
+    if(!folder.exists()) {
+      err("does not exist")
+    } else if (!folder.isDirectory) {
+      err("is not a file")
+    } else {
+      println(s"watching folder $name ...")
+      Some(folder)
     }
   }
 }

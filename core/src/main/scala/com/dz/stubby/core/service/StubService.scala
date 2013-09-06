@@ -77,6 +77,16 @@ class StubService extends Logging {
     }
   }
 
+  def deleteResponse(exchange:StubExchange) = this.synchronized {
+    val toDelete = responses.filterNot(
+      _.matches(exchange.request).matches
+    )
+    toDelete.foreach { it =>
+      val index = responses.indexOf(it)
+      responses.remove(index)
+    }
+  }
+
   def deleteResponses() = this.synchronized {
     LOGGER.trace("Deleting all responses")
     responses.clear
