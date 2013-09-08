@@ -53,7 +53,7 @@ case class StubUnfilteredResponse(result: StubResponse) extends Responder[Any] {
   }
 }
 
-class Server(paths:Seq[File]) {
+class Server(paths: Seq[File]) {
   import Transformer._
 
   val service = new StubService
@@ -155,23 +155,23 @@ object Main {
     }
   }
 
-  def parseFileArgs(args:Array[String]) = {
+  def parseFileArgs(args: Array[String]) = {
     args.flatMap(loadFolder)
   }
 
-  def loadFolder(name:String) = {
+  def loadFolder(name: String) = {
     val folder = new File(name)
-    def err = (msg:String) => {
-      System.err.println(s"folder: $name $msg, skipping")
+    def err = (msg: String) => {
+      System.err.println(s"Warning: folder '$name' $msg, skipping")
       None
     }
 
-    if(!folder.exists()) {
+    if (!folder.exists()) {
       err("does not exist")
     } else if (!folder.isDirectory) {
       err("is not a file")
     } else {
-      println(s"watching folder $name ...")
+      println(s"Watching folder '$name'...")
       Some(folder)
     }
   }
