@@ -78,12 +78,15 @@ class StubService extends Logging {
   }
 
   def deleteResponse(exchange:StubExchange) = this.synchronized {
-    val toDelete = responses.filterNot(
-      _.matches(exchange.request).matches
-    )
-    toDelete.foreach { it =>
+    val toDelete = responses.filter{ it =>
+      println("it"+it+"exchange.req"+exchange.request+" match: "+it.matches(exchange.request).matches)
+      it.matches(exchange.request).matches
+    }
+    toDelete.foreach { it:StubServiceExchange =>
       val index = responses.indexOf(it)
+      println("index:"+index)
       responses.remove(index)
+      println("responses="+responses)
     }
   }
 

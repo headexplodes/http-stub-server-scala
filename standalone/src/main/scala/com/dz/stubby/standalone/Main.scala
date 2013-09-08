@@ -58,7 +58,7 @@ class Server(paths:Seq[File]) {
 
   val service = new StubService
   val jsonService = new JsonServiceInterface(service)
-  val fileSource = new FileSource(paths, service, jsonService).loadInitialFiles()
+  val fileSource = new FileSource(paths, service, jsonService).loadInitialFiles().watchFolders()
 
   private def handleNotFound[T >: ResponseFunction[Any]](body: => T): T =
     try {
@@ -148,7 +148,8 @@ object Main {
   def main(args: Array[String]) {
     if (args.length > 0) {
       val paths = parseFileArgs(args.tail)
-      Http(args(0).toInt).plan(new AppPlan(new Server(paths))).run()
+      val server = new Server(paths)
+      Http(args(0).toInt).plan(new AppPlan(server)).beforeStop({ server.fileSource.monitor.stop() }).run()
     } else {
       throw new RuntimeException("Usage: java ... <port>")
     }
