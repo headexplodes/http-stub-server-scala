@@ -186,4 +186,17 @@ class StubServiceTest extends FunSuite {
     assert(result.head.path.get === "/test2")
   }
 
+
+  test("remove exchange by match") {
+    val service = defaultService
+    service.deleteResponse(StubExchange(
+            StubRequest(path = "/foo", method = "GE."),
+            StubResponse(status = CREATED)))
+
+    val result = service.findMatch(defaultRequest)
+
+    assert(result.matchFound)
+    assert(result.response.get.status === OK) // created no longer exists
+    assert(result.attempts.size === 1) // ensure attempts returned
+  }
 }
