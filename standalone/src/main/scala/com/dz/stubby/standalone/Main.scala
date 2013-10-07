@@ -118,6 +118,11 @@ object WaitParam extends Params.Extract(
 
 class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse {
   def intent = {
+    case req @ Path(Seg("_control" :: "shutdown" :: Nil)) => req match {
+      case _ =>
+        System.exit(0)
+        ResponseString("Shutting Down")
+    }
     case req @ Path(Seg("_control" :: "responses" :: Nil)) => req match {
       case GET(_) => server.getResponses
       case DELETE(_) => server.deleteResponses
