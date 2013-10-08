@@ -118,6 +118,11 @@ object WaitParam extends Params.Extract(
 
 class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with ServerErrorResponse {
   def intent = {
+    case req @ Path(Seg("_control" :: "shutdown" :: Nil)) => req match {
+      case _ =>
+        Main.http.get.stop()
+        ResponseString("Shutting Down")
+    }
     case req @ Path(Seg("_control" :: "responses" :: Nil)) => req match {
       case GET(_) => server.getResponses
       case DELETE(_) => server.deleteResponses
@@ -145,6 +150,9 @@ class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with Serv
 }
 
 object Main {
+
+  var http:Option[Http] = None
+
   def main(args: Array[String]) {
     if (args.length > 0) {
       val paths = parseFileArgs(args.tail)
@@ -153,6 +161,12 @@ object Main {
     } else {
       throw new RuntimeException("Usage: java ... <port>")
     }
+  }
+
+  def start(port:Int, paths: List[String]) {
+    val server = new Server(paths.flatMap{ n:String => loadFolder(n)})
+    http = Some(Http(port).plan(new AppPlan(server)).beforeStop({ server.fileSource.monitor.stop() }))
+    http.get.start()
   }
 
   def parseFileArgs(args: Array[String]) = {
