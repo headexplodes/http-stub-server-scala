@@ -5,7 +5,7 @@ object BuildSettings {
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
     organization := "com.dz",
-    version := "1.0-SNAPSHOT",
+    version := "1.0",
     scalaVersion := "2.10.3",
     scalacOptions ++= Seq("-feature")
   )
