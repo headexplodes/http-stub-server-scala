@@ -10,6 +10,7 @@
  - [ ] Tool for bulk-loading messages
  - [ ] Example Ruby/Scala/other, client code for interacting with stub (make Ruby code a Gem)
  - [ ] Persistence (async writes, persist on shutdown)
+ - [ ] Explicit 'body pattern' type parameter (add support for XPath?, JSONPath?, Regular expressions, etc.)
 
 ## Github TODO
 
@@ -17,4 +18,10 @@
  - [ ] Add some downloadable releases
  - [ ] Document JavaScript support
  - [ ] Document filtering support (/_control/requests?method=GET&path=...)
+ - [ ] Binary/source release via Github
+        * Increment version (to 1.0)
+        * Produce assembly and upload to Github
+        * Tag as release on Github
+        * Ensure licence and all other licences, including where to get code are inside artefact.
+
 

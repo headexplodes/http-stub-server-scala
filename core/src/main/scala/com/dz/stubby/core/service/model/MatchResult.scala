@@ -1,6 +1,6 @@
 package com.dz.stubby.core.service.model
 
-case class MatchResult(val fields: List[MatchField]) extends Ordered[MatchResult] {
+case class MatchResult(fields: List[MatchField]) extends Ordered[MatchResult] {
 
   def this(fields: MatchField*) =
     this(fields.toList)

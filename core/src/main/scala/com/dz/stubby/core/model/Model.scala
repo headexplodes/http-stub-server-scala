@@ -28,11 +28,11 @@ trait StubMessage {
 }
 
 case class StubRequest(
-    val method: Option[String] = None, // optional so we can create filters
-    val path: Option[String] = None,
-    val params: List[StubParam] = Nil,
-    val headers: List[StubParam] = Nil,
-    val body: Option[AnyRef] = None) extends StubMessage {
+    method: Option[String] = None, // optional so we can create filters
+    path: Option[String] = None,
+    params: List[StubParam] = Nil,
+    headers: List[StubParam] = Nil,
+    body: Option[AnyRef] = None) extends StubMessage {
 
   type T = StubRequest
 
@@ -50,9 +50,9 @@ case class StubRequest(
 }
 
 case class StubResponse(
-    val status: Int,
-    val headers: List[StubParam] = Nil,
-    val body: Option[AnyRef] = None) extends StubMessage {
+    status: Int,
+    headers: List[StubParam] = Nil,
+    body: Option[AnyRef] = None) extends StubMessage {
 
   type T = StubResponse
 
@@ -64,10 +64,10 @@ case class StubResponse(
 }
 
 case class StubExchange(
-    val request: StubRequest,
-    val response: StubResponse,
-    val delay: Option[Int] = None,
-    val script: Option[String] = None) {
+    request: StubRequest,
+    response: StubResponse,
+    delay: Option[Int] = None,
+    script: Option[String] = None) {
 
   def nilLists() = copy( // for after Jackson deserialization (there _is_ a better way...)
     request = request.nilLists,

@@ -16,20 +16,18 @@ object RequestPattern {
   }
 
   def toBodyPattern(obj: Option[AnyRef]): Option[BodyPattern] = obj.map {
-    _ match {
       case str: String => new TextBodyPattern(str)
       case coll @ (_: collection.Map[_, _] | _: collection.Seq[_]) => new JsonBodyPattern(coll)
       case x @ _ => throw new RuntimeException("Unexpected body type: " + x.getClass)
-    }
   }
 }
 
 case class RequestPattern(
-    val method: Option[TextPattern],
-    val path: Option[TextPattern],
-    val params: Set[ParamPattern],
-    val headers: Set[ParamPattern],
-    val body: Option[BodyPattern]) {
+    method: Option[TextPattern],
+    path: Option[TextPattern],
+    params: Set[ParamPattern],
+    headers: Set[ParamPattern],
+    body: Option[BodyPattern]) {
 
   def this(request: StubRequest) = this(
     RequestPattern.toPattern(request.method),

@@ -18,3 +18,7 @@ target/
 .cache
 .settings/
 .worksheet/
+
+# IntelliJ specific
+.idea/
+.idea_modules/

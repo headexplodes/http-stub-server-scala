@@ -164,7 +164,7 @@ class StubServiceTest extends FunSuite {
     assert(service.findRequests(filter, 2000).size === 0)
   }
 
-  test("requets filter with wait") {
+  test("requests filter with wait") {
     val service = defaultService
     service.findMatch(StubRequest(path = "/test1"))
 
@@ -186,12 +186,11 @@ class StubServiceTest extends FunSuite {
     assert(result.head.path.get === "/test2")
   }
 
-
   test("remove exchange by match") {
     val service = defaultService
     service.deleteResponse(StubExchange(
-            StubRequest(path = "/foo", method = "GE."),
-            StubResponse(status = CREATED)))
+      StubRequest(path = "/foo", method = "GE."),
+      StubResponse(status = CREATED)))
 
     val result = service.findMatch(defaultRequest)
 
@@ -199,4 +198,25 @@ class StubServiceTest extends FunSuite {
     assert(result.response.get.status === OK) // created no longer exists
     assert(result.attempts.size === 1) // ensure attempts returned
   }
+
+  test("should be able to perform text match on XML content") {
+    val service = new StubService
+
+    service.addResponse(
+      StubExchange(
+        StubRequest(path = "/test", method = "POST", body = "<root>xml</root>"),
+        StubResponse(status = OK)))
+
+    def request1 = StubRequest(
+      method = "POST", path = "/test", body = "<root>xml</root>",
+      headers = List(StubParam("Content-Type", "text/xml")))
+
+    def request2 = StubRequest(
+      method = "POST", path = "/test", body = "<root>xml</root>",
+      headers = List(StubParam("Content-Type", "application/xml")))
+
+//    assert(service.findMatch(request1).matchFound)
+//    assert(service.findMatch(request2).matchFound)
+  }
+
 }
