@@ -17,3 +17,12 @@ Running
 $ sbt "project standalone" "run 8080"
 ```
 
+Release Notes
+-------------
+
+### Version 1.0 (2013-10-13)
+
+Initial release. 
+
+All tests in original test suite (from the Java version) are now passing.
+

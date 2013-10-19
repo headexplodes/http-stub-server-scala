@@ -7,7 +7,8 @@ object BuildSettings {
     organization := "com.dz",
     version := "1.0",
     scalaVersion := "2.10.3",
-    scalacOptions ++= Seq("-feature")
+    scalacOptions ++= Seq("-feature"),
+    fork := true // working around issue where JavaScript script engine was not found in tests (sbt 0.13.0)
   )
 
 }
