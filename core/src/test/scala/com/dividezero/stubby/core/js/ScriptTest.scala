@@ -43,13 +43,13 @@ class ScriptTest extends FunSuite {
   }
 
   test("simple expresssion") {
-    expectResult(3) {
+    assertResult(3) {
       executeScript("var a = 1; var b = 2; a + b;")
     }
   }
 
   test("get delay") {
-    expectResult(1234) {
+    assertResult(1234) {
       executeScript("exchange.delay")
     }
   }
@@ -57,7 +57,7 @@ class ScriptTest extends FunSuite {
   test("set delay") {
     val world = createWorld
     executeScript("exchange.delay = 666")(world)
-    expectResult(666) {
+    assertResult(666) {
       world.getDelay
     }
   }

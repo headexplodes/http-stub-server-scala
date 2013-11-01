@@ -1,28 +1,20 @@
 package com.dividezero.stubby.core.util
 
+import java.io.InputStream
+import java.io.OutputStream
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
-import com.fasterxml.jackson.databind.DeserializationConfig
-import com.fasterxml.jackson.databind.ObjectWriter
-import com.fasterxml.jackson.annotation.JsonInclude.Include
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.DeserializationFeature
-import java.io.OutputStream
-import java.io.InputStream
-import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.module.scala.JacksonModule
 
 object JsonUtils {
 
   def createDefaultMapper() = {
     val mapper = new ObjectMapper with ScalaObjectMapper
     mapper.registerModule(DefaultScalaModule)
-    //mapper.registerModule(CustomScalaModule)
     mapper.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     mapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS) // for 'exact' floating-point matches
     mapper.disable(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS)

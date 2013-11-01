@@ -1,6 +1,7 @@
 package com.dividezero.stubby.standalone
 
 import org.apache.commons.io.IOUtils
+import com.dividezero.stubby.BuildInfo
 import com.dividezero.stubby.core.model.StubResponse
 import com.dividezero.stubby.core.service.JsonServiceInterface
 import com.dividezero.stubby.core.service.NotFoundException
@@ -122,6 +123,10 @@ class AppPlan(server: Server) extends cycle.Plan with cycle.ThreadPool with Serv
       case _ =>
         Main.http.get.stop()
         ResponseString("Shutting Down")
+    }
+    case req @ Path(Seg("_control" :: "version" :: Nil)) => req match {
+      case _ =>
+        JsonResponse(JsonUtils.serialize(Map("version" -> BuildInfo.version))) // 'BuildInfo' object is auto-generated
     }
     case req @ Path(Seg("_control" :: "responses" :: Nil)) => req match {
       case GET(_) => server.getResponses

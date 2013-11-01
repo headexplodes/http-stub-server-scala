@@ -23,13 +23,14 @@ class ModelTest extends FunSuite {
   val minimalResponseMap = Map("status" -> 200)
 
   val testRequetsBody = Map("foo" -> "bar")
-  val testRequest = StubRequest("GET", "/foo", List(testParam), List(testParam), testRequetsBody)
+  val testRequest = StubRequest("GET", "/foo", List(testParam), List(testParam), testRequetsBody, "testBodyType")
   val testRequestMap = Map(
     "method" -> "GET",
     "path" -> "/foo",
     "headers" -> List(testParamMap),
     "params" -> List(testParamMap),
-    "body" -> testRequetsBody)
+    "body" -> testRequetsBody,
+    "bodyType" -> "testBodyType")
     
   val testExchange = StubExchange(testRequest, testResponse, Some(1234), Some("script()"))
   val testExchangeMap = Map(

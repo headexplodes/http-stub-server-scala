@@ -39,9 +39,9 @@ class JsonBodyPatternTest extends FunSuite {
 
   def assertPattern(pattern: String): PartialAssert = new PartialAssert(pattern)
 
-  test("invalid content type") {
+  test("should match non-JSON content type") {
     val request = message("{}").setHeader("Content-Type", "text/plain")
-    assert(MatchType.MATCH_FAILURE === makePattern("{}").matches(request).matchType)
+    assert(MatchType.MATCH === makePattern("{}").matches(request).matchType)
   }
 
   test("empty pattern") {

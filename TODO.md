@@ -11,6 +11,7 @@
  - [ ] Example Ruby/Scala/other, client code for interacting with stub (make Ruby code a Gem)
  - [ ] Persistence (async writes, persist on shutdown)
  - [ ] Explicit 'body pattern' type parameter (add support for XPath?, JSONPath?, Regular expressions, etc.)
+ - [ ] Add version endpoint (like Java version)
 
 ## Github TODO
 

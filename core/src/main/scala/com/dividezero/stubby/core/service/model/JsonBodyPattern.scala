@@ -4,8 +4,12 @@ import com.dividezero.stubby.core.model._
 import com.dividezero.stubby.core.util.HttpMessageUtils
 import com.dividezero.stubby.core.util.JsonUtils
 import com.dividezero.stubby.core.util.ListUtils._
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.typesafe.scalalogging.log4j.Logging
 
-class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
+class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern with Logging {
+
+  val LOGGER = logger // make logging stand out...
 
   case class MatchResult(matches: Boolean, path: String, reason: String) { // internal match result type
     def message: String = "%s (at '%s')".format(reason, path)
@@ -32,10 +36,15 @@ class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
    * be regular expressions. All strings are converted to strings for matching.
    */
   private def matchResult(request: StubMessage): MatchResult = {
-    if (HttpMessageUtils.isJson(request)) { // require a JSON body
-      matchValue(pattern, HttpMessageUtils.bodyAsJson(request), ""); // root could be any type (eg, an array)
-    } else {
-      matchFailure("Expected content type: application/json", ".");
+    try {
+      val jsonBody = HttpMessageUtils.bodyAsJson(request)
+      matchValue(pattern, jsonBody); // root could be any type (eg, an array)
+    } catch {
+      case e: JsonProcessingException => {
+        val msg = "Could not parse body as JSON"
+        LOGGER.trace(msg, e)
+        matchFailure(s"${msg}: ${e.getMessage}", ".")
+      }
     }
   }
 
@@ -51,9 +60,9 @@ class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
       for (key <- pattern.keySet) yield {
         val childPath = path + "." + key
         if (request.contains(key)) {
-            matchValue(pattern(key), request(key), childPath)
+          matchValue(pattern(key), request(key), childPath)
         } else {
-            matchFailure("Property '%s' expected".format(key), childPath)
+          matchFailure("Property '%s' expected".format(key), childPath)
         }
       }
 
@@ -80,7 +89,7 @@ class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
       return matchSuccess()
     } else {
       return matches.map(_._2).find(!_.matches).getOrElse(
-          matchFailure("Array elements expected in different order", path)) // just report first failed match
+        matchFailure("Array elements expected in different order", path)) // just report first failed match
     }
   }
 
@@ -99,7 +108,7 @@ class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
    *    
    *  - An object in the pattern can only match an object in the request. See 'matchObject()' for more detail.
    */
-  private def matchValue(pattern: Any, request: Any, path: String): MatchResult = { // TODO: add better debugging information
+  private def matchValue(pattern: Any, request: Any, path: String = ""): MatchResult = { // TODO: add better debugging information
     pattern match {
 
       case null => request match {
@@ -148,8 +157,8 @@ class JsonBodyPattern(val pattern: AnyRef) extends BodyPattern {
 
       case patternMap: collection.Map[_, _] => request match {
         case requestMap: collection.Map[_, _] => matchObject(
-            patternMap.asInstanceOf[collection.Map[String, Any]],
-            requestMap.asInstanceOf[collection.Map[String, Any]], path) // recursively match objects
+          patternMap.asInstanceOf[collection.Map[String, Any]],
+          requestMap.asInstanceOf[collection.Map[String, Any]], path) // recursively match objects
         case _ => matchFailure("Object expected", path)
       }
 

@@ -7,7 +7,7 @@ import scala.util.matching.Regex
 import org.scalatest.FunSuite
 import com.dividezero.stubby.core.util.OptionUtils
 
-class TextBodyPatternTest extends FunSuite with BeforeAndAfter {
+class RegexBodyPatternTest extends FunSuite with BeforeAndAfter {
 
   import OptionUtils._
 
@@ -15,7 +15,7 @@ class TextBodyPatternTest extends FunSuite with BeforeAndAfter {
     new StubRequest("METHOD", "path", Nil, List(new StubParam("Content-Type", "text/plain")), "foo")
 
   def assertRequestMatches(patternStr: String)(implicit request: StubRequest) = {
-    val pattern = new TextBodyPattern(new TextPattern(patternStr))
+    val pattern = new RegexBodyPattern(new TextPattern(patternStr))
 
     val result = pattern.matches(request)
 
@@ -24,7 +24,7 @@ class TextBodyPatternTest extends FunSuite with BeforeAndAfter {
   }
 
   def assertRequestDoesNotMatch(patternStr: String)(implicit request: StubRequest) = {
-    val pattern = new TextBodyPattern(new TextPattern(patternStr))
+    val pattern = new RegexBodyPattern(new TextPattern(patternStr))
 
     val result = pattern.matches(request)
 
@@ -32,11 +32,11 @@ class TextBodyPatternTest extends FunSuite with BeforeAndAfter {
     assert(result.matchType === MatchType.MATCH_FAILURE)
   }
 
-  test("invalid content type") {
-    implicit val request =
-      defaultRequest.copy(headers = List(new StubParam("Content-Type", "application/json")))
+  test("should match non-text content type") {
+    val request =
+      defaultRequest.copy(headers = List(new StubParam("Content-Type", "application/xml")))
 
-    assertRequestDoesNotMatch("foo")(request)
+    assertRequestMatches("foo")(request)
   }
 
   test("matches") {
@@ -57,7 +57,7 @@ class TextBodyPatternTest extends FunSuite with BeforeAndAfter {
   }
 
   test("equality") {
-    assert(new TextBodyPattern(new TextPattern("foo.*")) === new TextBodyPattern(new TextPattern("foo.*")))
+    assert(new RegexBodyPattern(new TextPattern("foo.*")) === new RegexBodyPattern(new TextPattern("foo.*")))
   }
 
 }

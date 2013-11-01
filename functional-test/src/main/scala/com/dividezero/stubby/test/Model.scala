@@ -1,15 +1,17 @@
-package com.dividezero.stubby.core.model
+package com.dividezero.stubby.test
 
-case class StubParam(name: String, value: String)
+case class JsonParam(name: String, value: String) {
+  def this(pair: (String, String)) = this(pair._1, pair._2)
+}
 
-trait StubMessage {
+trait JsonMessage {
 
-  type T <: StubMessage
+  type T <: JsonMessage
 
-  val headers: List[StubParam]
+  val headers: List[JsonParam]
   val body: Option[AnyRef]
 
-  def copyWith(headers: List[StubParam] = headers, body: Option[AnyRef] = body): T
+  def copyWith(headers: List[JsonParam] = headers, body: Option[AnyRef] = body): T
 
   def getHeader(name: String): Option[String] =
     headers.find(_.name.equalsIgnoreCase(name)).map(_.value)
@@ -17,7 +19,7 @@ trait StubMessage {
     headers.filter(_.name.equalsIgnoreCase(name)).map(_.value)
 
   def addHeader(name: String, value: String): T =
-    copyWith(headers :+ StubParam(name, value))
+    copyWith(headers :+ JsonParam(name, value))
   def removeHeader(name: String): T =
     copyWith(headers.filterNot(_.name.equalsIgnoreCase(name)))
   def setHeader(name: String, value: String): T#T =
@@ -25,22 +27,22 @@ trait StubMessage {
 
 }
 
-case class StubRequest(
-    method: Option[String] = None, // optional so we can create filters
+case class JsonRequest(
     path: Option[String] = None,
-    params: List[StubParam] = Nil,
-    headers: List[StubParam] = Nil,
+    method: Option[String] = None, // optional so we can create filters
+    params: List[JsonParam] = Nil,
+    headers: List[JsonParam] = Nil,
     body: Option[AnyRef] = None,
-    bodyType: Option[String] = None) extends StubMessage {
+    bodyType: Option[String] = None) extends JsonMessage {
 
-  type T = StubRequest
+  override type T = JsonRequest
 
   def getParam(name: String): Option[String] =
     params.find(_.name.equalsIgnoreCase(name)).map(_.value)
   def getParams(name: String): Seq[String] =
     params.filter(_.name == name).map(_.value)
 
-  override def copyWith(headers: List[StubParam], body: Option[AnyRef]): StubRequest =
+  override def copyWith(headers: List[JsonParam], body: Option[AnyRef]): JsonRequest =
     copy(headers = headers, body = body)
 
   def nilLists() = copy( // for after Jackson deserialization (there _is_ a better way...)
@@ -48,28 +50,29 @@ case class StubRequest(
     headers = if (headers != null) headers else Nil)
 }
 
-case class StubResponse(
-    status: Int,
-    headers: List[StubParam] = Nil,
-    body: Option[AnyRef] = None) extends StubMessage {
+case class JsonResponse(
+    status: Option[Int] = None,
+    headers: List[JsonParam] = Nil,
+    body: Option[AnyRef] = None) extends JsonMessage {
 
-  type T = StubResponse
+  override type T = JsonResponse
 
-  override def copyWith(headers: List[StubParam], body: Option[AnyRef]): StubResponse =
+  override def copyWith(headers: List[JsonParam], body: Option[AnyRef]): JsonResponse =
     copy(headers = headers, body = body)
 
   def nilLists() = copy( // for after Jackson deserialization (there _is_ a better way...)
     headers = if (headers != null) headers else Nil)
 }
 
-case class StubExchange(
-    request: StubRequest,
-    response: StubResponse,
+case class JsonExchange(
+    request: JsonRequest,
+    response: JsonResponse,
     delay: Option[Int] = None,
-    script: Option[String] = None,
-    scriptType: Option[String] = None) {
+    script: Option[String] = None) {
 
   def nilLists() = copy( // for after Jackson deserialization (there _is_ a better way...)
-    request = request.nilLists,
-    response = response.nilLists)
+    request = request.nilLists(),
+    response = response.nilLists())
 }
+
+case class JsonStubbedExchange(exchange: JsonExchange, attempts: List[AnyRef])

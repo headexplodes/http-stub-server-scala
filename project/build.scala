@@ -9,7 +9,7 @@ import com.typesafe.sbt.SbtPgp.PgpKeys._
 import scala._
 import scala.Some
 import Utilities._
-
+import sbtbuildinfo.Plugin._
 
 object BuildSettings {
 
@@ -20,7 +20,10 @@ object BuildSettings {
     fork := true // working around issue where JavaScript script engine was not found in tests (sbt 0.13.0)
   )
 
-  val publishSettings = releaseSettings ++ Seq(
+  val publishSettings = Nil 
+  
+  /*
+  val publishSettings2 = releaseSettings ++ Seq(
     publishMavenStyle := true,
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishTo := {
@@ -49,6 +52,11 @@ object BuildSettings {
           <name>Travis Dixon</name>
           <email>the.trav@gmail.com</email>
         </developer>
+        <developer>
+          <id>headexplodes</id>
+          <name>Robert Parsons</name>
+          <email>headexplodes@gmail.com</email>
+        </developer>
       </developers>,
 
     releaseProcess := Seq[ReleaseStep](
@@ -70,6 +78,7 @@ object BuildSettings {
     val ref = extracted.get(thisProjectRef)
     extracted.runAggregated(publishSigned in Global in ref, st)
   }
+  */
 
 }
 
@@ -80,6 +89,10 @@ object RootBuild extends Build {
   lazy val coreSettings = (
     buildSettings
       ++ Seq(libraryDependencies ++= Dependencies.jackson ++ Dependencies.runtime ++ Dependencies.test))
+      
+  lazy val functionalTestSettings = (
+    buildSettings
+      ++ Seq(libraryDependencies ++= Dependencies.jackson ++ Dependencies.runtime ++ Dependencies.test ++ Dependencies.functionalTest))
 
   lazy val standaloneSettings = (
     buildSettings
@@ -88,8 +101,14 @@ object RootBuild extends Build {
       ++ (unmanagedResources in Compile += (baseDirectory.value / ".." / "LICENSE.txt"))
       ++ (unmanagedResources in Compile += (baseDirectory.value / ".." / "README.md"))
       ++ sbtassembly.Plugin.assemblySettings
+      ++ buildInfoSettings
+      ++ Seq(
+          sourceGenerators in Compile <+= buildInfo,
+          buildInfoKeys := Seq[BuildInfoKey](name, version),
+          buildInfoPackage := "com.dividezero.stubby"
+      )
     )
-
+   
   lazy val root = Project(
     id = "stubby-root",
     base = file("."),
@@ -108,7 +127,7 @@ object RootBuild extends Build {
   lazy val functionalTest = Project(
     id = "stubby-functionalTest",
     base = file("functional-test"),
-    settings = buildSettings ++ publishSettings)
+    settings = functionalTestSettings ++ publishSettings) dependsOn (standalone)
 
 }
 
@@ -137,8 +156,14 @@ object Dependencies {
   )
 
   lazy val test = Seq(
-    "org.scalatest" %% "scalatest" % "2.0.M5b" % "test",
-    "org.scalamock" %% "scalamock-scalatest-support" % "3.0.1" % "test"
+    // "org.scalatest" %% "scalatest" % "2.0.M5b" % "test",
+    "org.scalamock" %% "scalamock-scalatest-support" % "3.0.1" % "test",
+    "org.scalatest" %% "scalatest" % "2.0" % "test",
+    "junit" % "junit" % "4.11" % "test"
+  )
+  
+  lazy val functionalTest = Seq(
+    "org.scalatest" %% "scalatest" % "2.0"
   )
 
   lazy val all = unfiltered ++ jackson ++ runtime ++ test

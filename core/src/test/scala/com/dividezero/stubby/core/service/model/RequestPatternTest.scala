@@ -4,10 +4,10 @@ import org.scalatest.FunSuite
 import com.dividezero.stubby.core.model.StubRequest
 import com.dividezero.stubby.core.model.StubParam
 import com.dividezero.stubby.core.service.model.FieldType._
-import org.scalatest.matchers.ShouldMatchers
 import com.dividezero.stubby.core.util.OptionUtils
+import org.scalatest.Matchers
 
-class RequestPatternTest extends FunSuite with ShouldMatchers {
+class RequestPatternTest extends FunSuite with Matchers {
 
   import OptionUtils._
 
@@ -68,7 +68,7 @@ class RequestPatternTest extends FunSuite with ShouldMatchers {
     assert(pattern.headers.head.name === "Content-Type")
     assert(pattern.headers.head.pattern === "text/plain; .+")
 
-    assert(pattern.body.get === new TextBodyPattern("body .*"))
+    assert(pattern.body.get === new RegexBodyPattern("body .*"))
   }
 
   test("construct from empty pattern") {
@@ -253,5 +253,7 @@ class RequestPatternTest extends FunSuite with ShouldMatchers {
 
     assertMatchFailure(PATH, "path", "/request/.*", "/invalid/request/test")(result)
   }
+
+  // TODO: add tests for body pattern types...
 
 }

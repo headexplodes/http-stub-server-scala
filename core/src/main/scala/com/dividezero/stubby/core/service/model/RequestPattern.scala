@@ -15,10 +15,8 @@ object RequestPattern {
     params.map(p => new ParamPattern(p.name, p.value)).toSet
   }
 
-  def toBodyPattern(obj: Option[AnyRef]): Option[BodyPattern] = obj.map {
-      case str: String => new TextBodyPattern(str)
-      case coll @ (_: collection.Map[_, _] | _: collection.Seq[_]) => new JsonBodyPattern(coll)
-      case x @ _ => throw new RuntimeException("Unexpected body type: " + x.getClass)
+  def toBodyPattern(req: StubRequest): Option[BodyPattern] = {
+    BodyPattern.fromRequest(req.body, req.bodyType)
   }
 }
 
@@ -34,7 +32,7 @@ case class RequestPattern(
     RequestPattern.toPattern(request.path),
     RequestPattern.toPattern(request.params),
     RequestPattern.toPattern(request.headers),
-    RequestPattern.toBodyPattern(request.body))
+    RequestPattern.toBodyPattern(request))
 
   def matches(message: StubRequest): MatchResult = {
 
