@@ -1,6 +1,9 @@
 import sbt._
 import sbt.Keys._
 
+import sbtrelease.ReleasePlugin._
+
+
 object BuildSettings {
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
@@ -10,6 +13,21 @@ object BuildSettings {
     scalacOptions ++= Seq("-feature"),
     fork := true // working around issue where JavaScript script engine was not found in tests (sbt 0.13.0)
   )
+
+  val publishSettings = releaseSettings ++ Seq(
+    credentials += Credentials("Sonatype Nexus Repository Manager", "localhost", "deployment", "admin123"),
+    publishTo := Some("releases" at "http://localhost:8081/nexus/content/repositories/releases/"),
+    pomExtra :=
+      <url>https://github.com/headexplodes/http-stub-server-scala</url>
+        <licenses>
+          <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+          </license>
+        </licenses>
+  )
+
 
 }
 
@@ -38,12 +56,12 @@ object RootBuild extends Build {
   lazy val core = Project(
     id = "core",
     base = file("core"),
-    settings = coreSettings)
+    settings = coreSettings ++ publishSettings)
 
   lazy val standalone = Project(
     id = "standalone",
     base = file("standalone"),
-    settings = standaloneSettings) dependsOn (core)
+    settings = standaloneSettings ++ publishSettings) dependsOn (core)
 
   lazy val functionalTest = Project(
     id = "functionalTest",
