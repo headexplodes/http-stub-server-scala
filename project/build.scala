@@ -8,15 +8,14 @@ object BuildSettings {
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
     organization := "com.dividezero",
-    version := "1.0-SNAPSHOT",
     scalaVersion := "2.10.3",
     scalacOptions ++= Seq("-feature"),
     fork := true // working around issue where JavaScript script engine was not found in tests (sbt 0.13.0)
   )
 
   val publishSettings = releaseSettings ++ Seq(
-    credentials += Credentials("Sonatype Nexus Repository Manager", "localhost", "deployment", "admin123"),
-    publishTo := Some("releases" at "http://localhost:8081/nexus/content/repositories/releases/"),
+    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+    publishTo := Some("releases" at "https://oss.sonatype.org/service/local/staging/deploy/maven2"),
     pomExtra :=
       <url>https://github.com/headexplodes/http-stub-server-scala</url>
       <licenses>
@@ -62,7 +61,7 @@ object RootBuild extends Build {
   lazy val root = Project(
     id = "root",
     base = file("."),
-    settings = buildSettings) aggregate(core, standalone, functionalTest)
+    settings = buildSettings ++ publishSettings) aggregate(core, standalone, functionalTest)
 
   lazy val core = Project(
     id = "core",
@@ -77,7 +76,7 @@ object RootBuild extends Build {
   lazy val functionalTest = Project(
     id = "functionalTest",
     base = file("functional-test"),
-    settings = buildSettings)
+    settings = buildSettings ++ publishSettings)
 
 }
 
