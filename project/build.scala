@@ -2,6 +2,13 @@ import sbt._
 import sbt.Keys._
 
 import sbtrelease.ReleasePlugin._
+import sbtrelease.ReleasePlugin.ReleaseKeys._
+import sbtrelease._
+import sbtrelease.ReleaseStateTransformations._
+import com.typesafe.sbt.SbtPgp.PgpKeys._
+import scala._
+import scala.Some
+import Utilities._
 
 
 object BuildSettings {
@@ -14,8 +21,15 @@ object BuildSettings {
   )
 
   val publishSettings = releaseSettings ++ Seq(
+    publishMavenStyle := true,
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-    publishTo := Some("releases" at "https://oss.sonatype.org/service/local/staging/deploy/maven2"),
+    publishTo := {
+      val nexus = "https://oss.sonatype.org/"
+      if (version.value.trim.endsWith("SNAPSHOT"))
+        Some("snapshots" at nexus + "content/repositories/snapshots")
+      else
+        Some("releases" at nexus + "service/local/staging/deploy/maven2")
+    },
     pomExtra :=
       <url>https://github.com/headexplodes/http-stub-server-scala</url>
       <licenses>
@@ -35,9 +49,27 @@ object BuildSettings {
           <name>Travis Dixon</name>
           <email>the.trav@gmail.com</email>
         </developer>
-      </developers>
+      </developers>,
+
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,              // : ReleaseStep
+      inquireVersions,                        // : ReleaseStep
+      runTest,                                // : ReleaseStep
+      setReleaseVersion,                      // : ReleaseStep
+      commitReleaseVersion,                   // : ReleaseStep, performs the initial git checks
+      tagRelease,                             // : ReleaseStep
+      publishArtifacts.copy(action = publishSignedAction),
+      setNextVersion,                         // : ReleaseStep
+      commitNextVersion,                      // : ReleaseStep
+      pushChanges                             // : ReleaseStep, also checks that an upstream branch is properly configured
+    )
   )
 
+  lazy val publishSignedAction = { st: State =>
+    val extracted = st.extract
+    val ref = extracted.get(thisProjectRef)
+    extracted.runAggregated(publishSigned in Global in ref, st)
+  }
 
 }
 
