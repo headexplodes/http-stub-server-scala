@@ -7,7 +7,7 @@ import sbtrelease.ReleasePlugin._
 object BuildSettings {
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
-    organization := "com.dz",
+    organization := "com.dividezero",
     version := "1.0-SNAPSHOT",
     scalaVersion := "2.10.3",
     scalacOptions ++= Seq("-feature"),
@@ -53,7 +53,7 @@ object RootBuild extends Build {
   lazy val standaloneSettings = (
     buildSettings
       ++ (libraryDependencies ++= Dependencies.all)
-      ++ (mainClass := Some("com.dz.stubby.standalone.Main"))
+      ++ (mainClass := Some("com.dividezero.stubby.standalone.Main"))
       ++ (unmanagedResources in Compile += (baseDirectory.value / ".." / "LICENSE.txt"))
       ++ (unmanagedResources in Compile += (baseDirectory.value / ".." / "README.md"))
       ++ sbtassembly.Plugin.assemblySettings
