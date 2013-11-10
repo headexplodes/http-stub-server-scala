@@ -59,22 +59,22 @@ object RootBuild extends Build {
     )
 
   lazy val root = Project(
-    id = "root",
+    id = "stubby-root",
     base = file("."),
     settings = buildSettings ++ publishSettings) aggregate(core, standalone, functionalTest)
 
   lazy val core = Project(
-    id = "core",
+    id = "stubby-core",
     base = file("core"),
     settings = coreSettings ++ publishSettings)
 
   lazy val standalone = Project(
-    id = "standalone",
+    id = "stubby-standalone",
     base = file("standalone"),
     settings = standaloneSettings ++ publishSettings) dependsOn (core)
 
   lazy val functionalTest = Project(
-    id = "functionalTest",
+    id = "stubby-functionalTest",
     base = file("functional-test"),
     settings = buildSettings ++ publishSettings)
 
