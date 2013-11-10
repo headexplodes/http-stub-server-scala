@@ -19,13 +19,24 @@ object BuildSettings {
     publishTo := Some("releases" at "http://localhost:8081/nexus/content/repositories/releases/"),
     pomExtra :=
       <url>https://github.com/headexplodes/http-stub-server-scala</url>
-        <licenses>
-          <license>
-            <name>Apache 2</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-          </license>
-        </licenses>
+      <licenses>
+        <license>
+          <name>Apache 2</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+      <scm>
+        <url>https://github.com/headexplodes/http-stub-server-scala</url>
+        <connection>https://github.com/headexplodes/http-stub-server-scala.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>thetrav</id>
+          <name>Travis Dixon</name>
+          <email>the.trav@gmail.com</email>
+        </developer>
+      </developers>
   )
 
 
