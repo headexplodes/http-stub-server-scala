@@ -115,30 +115,30 @@ object RootBuild extends Build {
 object Dependencies {
 
   val unfiltered = Seq(
-    "net.databinder" %% "unfiltered" % "0.6.8" withSources(),
-    "net.databinder" %% "unfiltered-filter" % "0.6.8" withSources(),
-    "net.databinder" %% "unfiltered-netty" % "0.6.8" withSources(),
-    "net.databinder" %% "unfiltered-netty-server" % "0.6.8" withSources()
+    "net.databinder" %% "unfiltered" % "0.6.8",
+    "net.databinder" %% "unfiltered-filter" % "0.6.8",
+    "net.databinder" %% "unfiltered-netty" % "0.6.8",
+    "net.databinder" %% "unfiltered-netty-server" % "0.6.8"
   )
 
   val jackson = Seq(
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.2.2" withSources(),
-    "com.fasterxml.jackson.core" % "jackson-core" % "2.2.2" withSources(),
-    "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.2" withSources()
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.2.2",
+    "com.fasterxml.jackson.core" % "jackson-core" % "2.2.2",
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.2"
   )
 
   lazy val runtime = Seq(
     "org.apache.commons" % "commons-lang3" % "3.1",
     "commons-io" % "commons-io" % "2.4",
-    "org.apache.httpcomponents" % "httpclient" % "4.2.5" withSources(),
-    "com.typesafe" %% "scalalogging-log4j" % "1.0.1" withSources(),
-    "org.apache.logging.log4j" % "log4j-core" % "2.0-beta3" withSources()
+    "org.apache.httpcomponents" % "httpclient" % "4.2.5",
+    "com.typesafe" %% "scalalogging-log4j" % "1.0.1",
+    "org.apache.logging.log4j" % "log4j-core" % "2.0-beta3"
     //"org.mozilla" % "rhino" % "1.7R4"
   )
 
   lazy val test = Seq(
-    "org.scalatest" %% "scalatest" % "2.0.M5b" % "test" withSources(),
-    "org.scalamock" %% "scalamock-scalatest-support" % "3.0.1" % "test" withSources()
+    "org.scalatest" %% "scalatest" % "2.0.M5b" % "test",
+    "org.scalamock" %% "scalamock-scalatest-support" % "3.0.1" % "test"
   )
 
   lazy val all = unfiltered ++ jackson ++ runtime ++ test
