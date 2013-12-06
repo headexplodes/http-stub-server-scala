@@ -12,8 +12,8 @@ It currently passes the full functional test suite included as part of the origi
 
 Some documentation to get started:
 
-* [Usage Scenarios](Usage Scenarios)
-* [API Documentation](API Documentation)
+* [Usage Scenarios](https://github.com/headexplodes/http-stub-server-scala/wiki/Usage%20Scenarios)
+* [API Documentation](https://github.com/headexplodes/http-stub-server-scala/wiki/API%20Documentation)
 
 Running
 -------
