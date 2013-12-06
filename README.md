@@ -3,9 +3,17 @@ Generic HTTP Stub Server (Scala)
 
 [![Build Status](https://travis-ci.org/headexplodes/http-stub-server-scala.png)](https://travis-ci.org/headexplodes/http-stub-server-scala)
 
-This an implementation of the [Generic HTTP Stub](http://github.com/sensis/http-stub-server) server in Scala with Unfiltered. This project is mainly for my own amusement. 
 
-It currently passes the full functional test suite includes as part of the original Java implementation.
+The Generic HTTP Stub Server (a.k.a. 'Stubby') is a protocol and server implementation for stubbing HTTP interactions, mainly aimed at automated acceptance testing. There's also some example client code in various languages.
+
+This an implementation of the [original Java version](http://github.com/sensis/http-stub-server) in Scala with Unfiltered.
+
+It currently passes the full functional test suite included as part of the original Java implementation.
+
+Some documentation to get started:
+
+* [Usage Scenarios](Usage Scenarios)
+* [API Documentation](API Documentation)
 
 Running
 -------
