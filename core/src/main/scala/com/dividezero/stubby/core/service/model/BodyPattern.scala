@@ -7,6 +7,8 @@ trait BodyPattern {
   def matches(request: StubMessage): MatchField
 }
 
+case class UnexpectedBodyTypeException(s: String) extends Exception(s) 
+
 object BodyPattern {
 
   def fromRequest(body: Option[AnyRef], bodyType: Option[String]): Option[BodyPattern] = {
@@ -29,13 +31,13 @@ object BodyPattern {
     }
     //case "jsonpath" => ???
     //case "xpath" => ???
-    case _ => throw new RuntimeException("Unknown body type: " + bodyType)
+    case _ => throw new UnexpectedBodyTypeException("Unknown body type: " + bodyType)
   }
 
   private def guess(body: AnyRef): BodyPattern = body match {
     case str: String => new RegexBodyPattern(str)
     case coll @ (_: collection.Map[_, _] | _: collection.Seq[_]) => new JsonBodyPattern(body)
-    case x @ _ => throw new RuntimeException("Unexpected body type: " + body.getClass)
+    case x @ _ => throw new UnexpectedBodyTypeException("Unexpected body type: " + body.getClass)
   }
 
 }

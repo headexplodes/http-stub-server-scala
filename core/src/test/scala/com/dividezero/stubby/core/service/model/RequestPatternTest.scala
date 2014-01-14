@@ -254,6 +254,4 @@ class RequestPatternTest extends FunSuite with Matchers {
     assertMatchFailure(PATH, "path", "/request/.*", "/invalid/request/test")(result)
   }
 
-  // TODO: add tests for body pattern types...
-
 }
